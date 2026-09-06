@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "description": "FARMY — Smart Farming Assistant. Static frontend + Vercel serverless API.",
-  "engines": {
-    "node": ">=18.0.0"
-  },
+ "engines": {
+  "node": "22.x"
+},
   "scripts": {
     "seed": "node scripts/seedCrops.js",
     "dev": "vercel dev"
