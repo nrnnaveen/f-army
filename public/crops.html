@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Crop Database — FARMY</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/farmy.css">
+</head>
+<body>
+  <div id="appwrap">
+    <div class="screen">
+      <div class="topbar">
+        <a href="index.html" class="iconbtn">←</a>
+        <h1>Crop Database</h1>
+        <span class="iconbtn spacer"></span>
+      </div>
+
+      <div class="content">
+        <div class="searchbar">
+          <span>🔍</span>
+          <input id="cropSearchInput" placeholder="Search crops (e.g. tomato, rice, wheat)…" oninput="handleSearch(this.value)">
+        </div>
+
+        <div class="chipgrid" style="margin-bottom: 12px;">
+          <button class="symptomchip active" onclick="filterCategory('All', this)">All</button>
+          <button class="symptomchip" onclick="filterCategory('Vegetable', this)">Vegetables</button>
+          <button class="symptomchip" onclick="filterCategory('Grain', this)">Grains</button>
+          <button class="symptomchip" onclick="filterCategory('Pulse', this)">Pulses</button>
+          <button class="symptomchip" onclick="filterCategory('Fruit', this)">Fruits</button>
+        </div>
+
+        <p class="hint" id="cropCountText">Showing 18 crops</p>
+        <div id="cropListContainer" class="croplistitems"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/farmy-data.js"></script>
+  <script src="js/farmy-core.js"></script>
+  <script>
+    let activeCategory = 'All';
+    let searchQuery = '';
+
+    function renderCrops() {
+      const container = $('#cropListContainer');
+      const crops = window.CROPS || [];
+
+      const filtered = crops.filter(c => {
+        const matchesCategory = activeCategory === 'All' || c.category.toLowerCase() === activeCategory.toLowerCase();
+        const matchesQuery = !searchQuery ||
+          c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          c.sci.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          c.category.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesCategory && matchesQuery;
+      });
+
+      $('#cropCountText').textContent = `Showing ${filtered.length} crop${filtered.length === 1 ? '' : 's'}`;
+
+      if (!filtered.length) {
+        container.innerHTML = `<div class="emptystate"><div class="emptystate-emoji">🔍</div><h3>No crops found</h3><p>Try searching for a different crop name or reset the category filter.</p></div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(c => `
+        <a href="crop-detail.html?id=${encodeURIComponent(c.id)}" class="listrow">
+          <span class="chipemoji">${c.emoji}</span>
+          <div>
+            <div class="listrow-name">${c.name}</div>
+            <div class="listrow-sub">${c.category} · ${c.seasons.join(', ')} · ${c.duration} days</div>
+          </div>
+          <span class="chev">›</span>
+        </a>
+      `).join('');
+    }
+
+    function handleSearch(q) {
+      searchQuery = q.trim();
+      renderCrops();
+    }
+
+    function filterCategory(cat, btn) {
+      activeCategory = cat;
+      $$('.chipgrid .symptomchip').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderCrops();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderBottomNav('crops');
+      renderCrops();
+    });
+  </script>
+</body>
+</html>

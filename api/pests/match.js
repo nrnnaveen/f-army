@@ -20,8 +20,13 @@ module.exports = withApi(async (req, res) => {
   const { data, error } = await supabaseAdmin().from('pest_diseases').select('*');
   if (error) return res.status(500).json({ error: error.message });
 
+  const lowerSymptoms = symptoms.map((s) => String(s).toLowerCase().trim());
   const matches = data
-    .map((p) => ({ ...p, matchCount: symptoms.filter((s) => (p.symptom_tags || []).includes(s)).length }))
+    .map((p) => {
+      const tags = (p.symptom_tags || []).map((t) => String(t).toLowerCase().trim());
+      const matchCount = lowerSymptoms.filter((s) => tags.includes(s)).length;
+      return { ...p, matchCount };
+    })
     .filter((p) => p.matchCount > 0)
     .sort((a, b) => b.matchCount - a.matchCount);
 

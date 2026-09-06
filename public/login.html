@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Login — FARMY</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/farmy.css">
+</head>
+<body>
+  <div id="appwrap">
+    <!-- Step 1: Send OTP -->
+    <div id="sendOtpScreen" class="screen login-screen">
+      <div class="login-hero">
+        <div class="brandmark">🌾</div>
+        <h1 class="brand">FARMY</h1>
+        <p class="tagline">Your smart farming companion</p>
+      </div>
+      <div class="login-card">
+        <div class="backend-status-pill"></div>
+        <div class="segmented">
+          <button id="segPhone" class="seg active" onclick="setLoginMethod('phone')">Phone</button>
+          <button id="segEmail" class="seg" onclick="setLoginMethod('email')">Email</button>
+        </div>
+
+        <label id="contactLabel" class="fieldlabel">Phone number</label>
+        <input id="contactInput" class="textfield" type="tel" placeholder="e.g. 9876543210" value="9876543210">
+
+        <label class="fieldlabel">Your name (optional)</label>
+        <input id="nameInput" class="textfield" type="text" placeholder="e.g. Ravi Kumar" value="Ravi Kumar">
+
+        <div id="loginBanner" class="banner"></div>
+        <button class="btn-primary big" id="sendOtpBtn" onclick="handleSendOtp()">Send OTP</button>
+        <p class="finetext">We'll send a one-time code to verify it's you. No password needed.</p>
+      </div>
+    </div>
+
+    <!-- Step 2: Verify OTP -->
+    <div id="verifyOtpScreen" class="screen login-screen" style="display:none;">
+      <div class="login-hero small">
+        <div class="brandmark">🔐</div>
+        <h1 class="brand small">Verify your code</h1>
+        <p id="otpSubText" class="tagline">Code sent to 9876543210</p>
+      </div>
+      <div class="login-card">
+        <div id="demoOtpNote" class="demo-otp-note">
+          📩 Demo mode: Here is your local verification code: <strong id="demoCodeDisplay">1234</strong>
+        </div>
+
+        <label class="fieldlabel">Enter code</label>
+        <input id="otpInput" class="textfield otp-input" type="tel" maxlength="6" placeholder="••••">
+        <div id="otpBanner" class="banner"></div>
+
+        <button class="btn-primary big" onclick="handleVerifyOtp()">Verify & Continue</button>
+        <button class="btn-text" onclick="showSendOtpScreen()">← Use a different number/email</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/farmy-data.js"></script>
+  <script src="js/farmy-core.js"></script>
+  <script>
+    let currentMethod = 'phone';
+    let generatedOtp = '1234';
+
+    function setLoginMethod(m) {
+      currentMethod = m;
+      $('#segPhone').classList.toggle('active', m === 'phone');
+      $('#segEmail').classList.toggle('active', m === 'email');
+      $('#contactLabel').textContent = m === 'phone' ? 'Phone number' : 'Email address';
+      const input = $('#contactInput');
+      input.type = m === 'phone' ? 'tel' : 'email';
+      input.placeholder = m === 'phone' ? 'e.g. 9876543210' : 'e.g. farmer@example.com';
+      input.value = m === 'phone' ? '9876543210' : 'farmer@example.com';
+    }
+
+    function showSendOtpScreen() {
+      $('#sendOtpScreen').style.display = 'block';
+      $('#verifyOtpScreen').style.display = 'none';
+    }
+
+    async function handleSendOtp() {
+      const contact = $('#contactInput').value.trim();
+      const name = $('#nameInput').value.trim() || (currentMethod === 'phone' ? 'Farmer' : contact.split('@')[0]);
+
+      if (!contact) {
+        showBanner('#loginBanner', 'Please enter your ' + (currentMethod === 'phone' ? 'phone number' : 'email address'));
+        return;
+      }
+      if (currentMethod === 'phone' && !/^\d{7,15}$/.test(contact.replace(/\s+/g, ''))) {
+        showBanner('#loginBanner', 'Please enter a valid phone number (digits only)');
+        return;
+      }
+      if (currentMethod === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact)) {
+        showBanner('#loginBanner', 'Please enter a valid email address');
+        return;
+      }
+
+      generatedOtp = String(Math.floor(1000 + Math.random() * 9000));
+      $('#demoCodeDisplay').textContent = generatedOtp;
+      $('#otpSubText').textContent = 'Code sent to ' + contact;
+
+      if (FarmyState.backendOnline) {
+        try {
+          await apiFetch('/auth/send-otp', {
+            method: 'POST',
+            body: JSON.stringify({ contact, method: currentMethod })
+          });
+          $('#demoOtpNote').className = 'demo-otp-note live';
+          $('#demoOtpNote').innerHTML = `📩 Live verification code sent to <b>${contact}</b>. Check your ${currentMethod === 'phone' ? 'SMS' : 'email'} inbox.`;
+        } catch (e) {
+          console.warn('Backend OTP failed, using demo OTP:', e.message);
+          $('#demoOtpNote').className = 'demo-otp-note';
+          $('#demoOtpNote').innerHTML = `📩 Demo mode: Here is your local verification code: <strong>${generatedOtp}</strong>`;
+        }
+      } else {
+        $('#demoOtpNote').className = 'demo-otp-note';
+        $('#demoOtpNote').innerHTML = `📩 Demo mode: Here is your local verification code: <strong>${generatedOtp}</strong>`;
+      }
+
+      $('#sendOtpScreen').style.display = 'none';
+      $('#verifyOtpScreen').style.display = 'block';
+      $('#otpInput').value = '';
+      $('#otpInput').focus();
+    }
+
+    async function handleVerifyOtp() {
+      const entered = $('#otpInput').value.trim();
+      const contact = $('#contactInput').value.trim();
+      const name = $('#nameInput').value.trim() || (currentMethod === 'phone' ? 'Farmer' : contact.split('@')[0]);
+
+      if (FarmyState.backendOnline) {
+        try {
+          const res = await apiFetch('/auth/verify-otp', {
+            method: 'POST',
+            body: JSON.stringify({
+              contact,
+              method: currentMethod,
+              code: entered,
+              fullName: name
+            })
+          });
+          FarmyState.session = res.session;
+          FarmyState.saveUser({
+            id: res.user?.id || 'demo-user',
+            name,
+            contact,
+            method: currentMethod
+          });
+          window.location.href = 'index.html';
+          return;
+        } catch (e) {
+          showBanner('#otpBanner', e.message);
+          return;
+        }
+      }
+
+      // Demo verification
+      if (entered === generatedOtp || entered === '1234') {
+        FarmyState.saveUser({
+          id: 'demo-user-' + Date.now(),
+          name,
+          contact,
+          method: currentMethod
+        });
+        window.location.href = 'index.html';
+      } else {
+        showBanner('#otpBanner', 'Incorrect code. Please try again or use ' + generatedOtp);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      checkBackend();
+      // Allow enter key on inputs
+      $('#contactInput').addEventListener('keydown', e => { if (e.key === 'Enter') handleSendOtp(); });
+      $('#otpInput').addEventListener('keydown', e => { if (e.key === 'Enter') handleVerifyOtp(); });
+    });
+  </script>
+</body>
+</html>

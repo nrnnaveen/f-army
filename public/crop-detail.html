@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Crop Profile — FARMY</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/farmy.css">
+</head>
+<body>
+  <div id="appwrap">
+    <div class="screen">
+      <div class="topbar">
+        <a href="crops.html" class="iconbtn">←</a>
+        <h1 id="cropTitle">Crop Guide</h1>
+        <span class="iconbtn spacer"></span>
+      </div>
+
+      <div class="content">
+        <div class="crophero">
+          <span id="cropEmoji" class="crophero-emoji">🌱</span>
+          <div>
+            <div id="cropName" class="crophero-name">Loading…</div>
+            <div id="cropSci" class="crophero-sci">Scientific name</div>
+          </div>
+        </div>
+
+        <div class="tabbar">
+          <button class="tab active" onclick="switchTab('overview', this)">Overview</button>
+          <button class="tab" onclick="switchTab('soil', this)">Soil & Climate</button>
+          <button class="tab" onclick="switchTab('water', this)">Water</button>
+          <button class="tab" onclick="switchTab('fertilizer', this)">Fertilizer</button>
+          <button class="tab" onclick="switchTab('timeline', this)">Timeline</button>
+        </div>
+
+        <div id="tabContent"></div>
+
+        <div style="margin-top: 24px;">
+          <a id="pestCheckBtn" href="pests.html" class="btn-secondary big">🐛 Check pests for this crop</a>
+          <button class="btn-primary big" onclick="openAddFarmModal()">➕ Add to My Farm</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add to Farm Modal -->
+    <div id="addFarmModal" class="modal-overlay" style="display:none;">
+      <div class="modal-card">
+        <h3 class="modal-title">Add to My Farm</h3>
+        <p class="hint" id="modalCropName">Add crop to track stages and watering</p>
+
+        <label class="fieldlabel">Land Area (Acres)</label>
+        <input id="farmAreaInput" class="textfield" type="number" step="0.1" min="0.1" value="1.0">
+
+        <label class="fieldlabel">Planting Date</label>
+        <input id="farmDateInput" class="textfield" type="date">
+
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="closeAddFarmModal()">Cancel</button>
+          <button class="btn-primary" onclick="confirmAddToFarm()">Save Crop</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/farmy-data.js"></script>
+  <script src="js/farmy-core.js"></script>
+  <script>
+    let currentCrop = null;
+    let currentTab = 'overview';
+
+    function getCropFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id') || 'tomato';
+      return findCrop(id) || window.CROPS[0];
+    }
+
+    function renderCropHeader() {
+      if (!currentCrop) return;
+      $('#cropTitle').textContent = currentCrop.name;
+      $('#cropEmoji').textContent = currentCrop.emoji;
+      $('#cropName').textContent = currentCrop.name;
+      $('#cropSci').textContent = `${currentCrop.sci} · ${currentCrop.category}`;
+      $('#pestCheckBtn').href = `pests.html?crop=${encodeURIComponent(currentCrop.id)}`;
+    }
+
+    function renderTabContent() {
+      const container = $('#tabContent');
+      const c = currentCrop;
+      if (!c) return;
+
+      if (currentTab === 'overview') {
+        container.innerHTML = `
+          <div class="infogrid">
+            <div class="infobox"><div class="infolabel">Best season</div><div class="infoval">${c.seasons.join(', ')}</div></div>
+            <div class="infobox"><div class="infolabel">Planting months</div><div class="infoval">${c.months}</div></div>
+            <div class="infobox"><div class="infolabel">Temp range</div><div class="infoval">${c.temp[0]}–${c.temp[1]}°C</div></div>
+            <div class="infobox"><div class="infolabel">Duration</div><div class="infoval">${c.duration} days</div></div>
+          </div>
+          <h3 class="subhead">Planting Guide</h3>
+          <ol class="steplist">${c.planting.map(p => `<li>${p}</li>`).join('')}</ol>
+        `;
+      } else if (currentTab === 'soil') {
+        container.innerHTML = `
+          <div class="infogrid">
+            <div class="infobox"><div class="infolabel">Ideal pH</div><div class="infoval">${c.ph[0]}–${c.ph[1]}</div></div>
+            <div class="infobox"><div class="infolabel">Soil types</div><div class="infoval">${c.soils.join(', ')}</div></div>
+            <div class="infobox"><div class="infolabel">Humidity</div><div class="infoval">${c.humidity[0]}–${c.humidity[1]}%</div></div>
+            <div class="infobox"><div class="infolabel">Sunlight</div><div class="infoval">${c.sunlight}</div></div>
+          </div>
+          <p class="notebox">🌧️ <b>Rainfall:</b> ${c.rainfall}</p>
+          <div class="minitool">
+            <h3 class="subhead">Compare with your soil</h3>
+            <a href="soil.html?crop=${encodeURIComponent(c.id)}" class="btn-secondary">Run Soil Check →</a>
+          </div>
+        `;
+      } else if (currentTab === 'water') {
+        container.innerHTML = `
+          <div class="infogrid">
+            <div class="infobox"><div class="infolabel">Water need</div><div class="infoval">${c.water}</div></div>
+            <div class="infobox"><div class="infolabel">Irrigation</div><div class="infoval">${c.irrigation}</div></div>
+          </div>
+          <p class="notebox">⚠️ <b>Critical stage:</b> ${c.waterCritical}</p>
+          <p class="notebox warn">Avoid both overwatering (root rot) and water stress during flowering/fruiting.</p>
+        `;
+      } else if (currentTab === 'fertilizer') {
+        const n = c.npk || {};
+        container.innerHTML = `
+          <div class="infogrid">
+            <div class="infobox"><div class="infolabel">Nitrogen (N)</div><div class="infoval">${n.n || 0} kg/acre</div></div>
+            <div class="infobox"><div class="infolabel">Phosphorus (P)</div><div class="infoval">${n.p || 0} kg/acre</div></div>
+            <div class="infobox"><div class="infolabel">Potassium (K)</div><div class="infoval">${n.k || 0} kg/acre</div></div>
+          </div>
+          <p class="notebox">📋 <b>Application:</b> ${c.fertNote}</p>
+          <p class="notebox warn">Fertilizer doses vary by local soil condition — use this as an advisory baseline.</p>
+        `;
+      } else if (currentTab === 'timeline') {
+        container.innerHTML = `
+          <div class="timeline">
+            ${c.stages.map((s, i) => `
+              <div class="tlstep">
+                <div class="tldot">${i + 1}</div>
+                <div class="tlbody">
+                  <div class="tlname">${s.name} <span class="tldays">Day ${s.days}</span></div>
+                  <div class="tlrow"><b>Care:</b> ${s.care}</div>
+                  <div class="tlrow"><b>Water:</b> ${s.water}</div>
+                  <div class="tlrow"><b>Fertilizer:</b> ${s.fert}</div>
+                  <div class="tlrow warn"><b>Watch out:</b> ${s.warn}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+    }
+
+    function switchTab(t, btn) {
+      currentTab = t;
+      $$('.tabbar .tab').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderTabContent();
+    }
+
+    function openAddFarmModal() {
+      $('#modalCropName').textContent = `Add ${currentCrop.name} to track watering & harvest`;
+      $('#farmDateInput').value = new Date().toISOString().slice(0, 10);
+      $('#addFarmModal').style.display = 'flex';
+    }
+
+    function closeAddFarmModal() {
+      $('#addFarmModal').style.display = 'none';
+    }
+
+    async function confirmAddToFarm() {
+      const area = parseFloat($('#farmAreaInput').value) || 1.0;
+      const plantedDate = $('#farmDateInput').value || new Date().toISOString().slice(0, 10);
+
+      const newItem = {
+        cropId: currentCrop.id,
+        area,
+        plantedDate
+      };
+
+      const myFarm = FarmyState.myFarm || [];
+      myFarm.unshift(newItem);
+      FarmyState.saveMyFarm(myFarm);
+
+      if (FarmyState.backendOnline && FarmyState.farmId) {
+        try {
+          await apiFetch(`/farms/${FarmyState.farmId}/crops`, {
+            method: 'POST',
+            body: JSON.stringify({
+              cropId: currentCrop.id,
+              areaAcres: area,
+              plantedDate
+            })
+          });
+        } catch (e) {
+          console.warn('Backend sync failed, saved locally:', e.message);
+        }
+      }
+
+      window.location.href = 'farm.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      currentCrop = getCropFromUrl();
+      renderCropHeader();
+      renderTabContent();
+      renderBottomNav('crops');
+    });
+  </script>
+</body>
+</html>

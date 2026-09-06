@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Farmy Assistant — FARMY</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/farmy.css">
+</head>
+<body>
+  <div id="appwrap">
+    <div class="screen assistant-screen">
+      <div class="topbar">
+        <a href="index.html" class="iconbtn">←</a>
+        <h1>Farmy Assistant 🌱</h1>
+        <button class="iconbtn" onclick="clearChat()" title="Clear conversation">🗑</button>
+      </div>
+
+      <div class="content assistant-body">
+        <div id="chatLog" class="chatlog"></div>
+
+        <div class="chatinputrow">
+          <input id="chatInput" class="textfield chatinput" placeholder="Ask about planting, water, pests, fertilizer…" onkeydown="if(event.key==='Enter')sendMessage()">
+          <button id="sendBtn" class="btn-primary sendbtn" onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/farmy-data.js"></script>
+  <script src="js/farmy-core.js"></script>
+  <script>
+    let isBusy = false;
+
+    function renderChat() {
+      const log = $('#chatLog');
+      const messages = FarmyState.chat || [];
+
+      log.innerHTML = messages.map(m => `
+        <div class="chatmsg ${m.role}">
+          ${m.text}
+        </div>
+      `).join('') + (isBusy ? `<div class="chatmsg assistant typing">Farmy is typing…</div>` : '');
+
+      log.scrollTop = log.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const input = $('#chatInput');
+      const text = input.value.trim();
+      if (!text || isBusy) return;
+
+      const messages = FarmyState.chat || [];
+      messages.push({ role: 'user', text });
+      FarmyState.saveChat(messages);
+
+      input.value = '';
+      isBusy = true;
+      renderChat();
+
+      let replyText;
+      if (FarmyState.backendOnline && FarmyState.session) {
+        try {
+          const res = await apiFetch('/assistant/ask', {
+            method: 'POST',
+            body: JSON.stringify({
+              message: text,
+              history: messages.slice(0, -1)
+            })
+          });
+          replyText = res.reply;
+        } catch (e) {
+          replyText = assistantLocalFallback(text);
+        }
+      } else {
+        // Small delay for natural feel
+        await new Promise(r => setTimeout(r, 200));
+        replyText = assistantLocalFallback(text);
+      }
+
+      messages.push({ role: 'assistant', text: replyText });
+      FarmyState.saveChat(messages);
+      isBusy = false;
+      renderChat();
+    }
+
+    function clearChat() {
+      if (confirm('Clear chat history?')) {
+        const fresh = [
+          { role: 'assistant', text: "Hello! I'm Farmy Assistant 🌱. How can I help your farm today?" }
+        ];
+        FarmyState.saveChat(fresh);
+        renderChat();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderBottomNav('assistant');
+      renderChat();
+      checkBackend();
+      $('#chatInput').focus();
+    });
+  </script>
+</body>
+</html>

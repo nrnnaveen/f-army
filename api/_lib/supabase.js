@@ -1,4 +1,9 @@
-const { createClient } = require('@supabase/supabase-js');
+let createClient = null;
+try {
+  createClient = require('@supabase/supabase-js').createClient;
+} catch (e) {
+  // @supabase/supabase-js optional/uninstalled in demo mode
+}
 
 // Service-role client: used ONLY on the backend (never exposed to the app).
 // Bypasses Row Level Security, so every query here must manually filter by user_id.
@@ -11,11 +16,11 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || '';
 
 function isSupabaseConfigured() {
-  return Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
+  return Boolean(createClient && SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
 }
 
 function isSupabaseAuthConfigured() {
-  return Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
+  return Boolean(createClient && SUPABASE_URL && SUPABASE_ANON_KEY);
 }
 
 let _admin = null;

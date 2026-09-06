@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Crop Recommendation — FARMY</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/farmy.css">
+</head>
+<body>
+  <div id="appwrap">
+    <div class="screen">
+      <div class="topbar">
+        <a href="index.html" class="iconbtn">←</a>
+        <h1>Find Suitable Crop</h1>
+        <span class="iconbtn spacer"></span>
+      </div>
+
+      <div class="content">
+        <div id="formSection">
+          <p class="hint">Tell us about your land and conditions — we'll match them against our agricultural crop database.</p>
+
+          <label class="fieldlabel">Soil Type</label>
+          <select id="f_soil" class="textfield">
+            <option value="Loamy">Loamy</option>
+            <option value="Sandy loam" selected>Sandy loam</option>
+            <option value="Sandy">Sandy</option>
+            <option value="Clay">Clay</option>
+            <option value="Clay loam">Clay loam</option>
+          </select>
+
+          <label class="fieldlabel">Soil pH</label>
+          <input id="f_ph" class="textfield" type="number" step="0.1" min="4.0" max="9.5" value="6.5">
+
+          <label class="fieldlabel">Average Temperature (°C)</label>
+          <input id="f_temp" class="textfield" type="number" min="0" max="55" value="27">
+
+          <label class="fieldlabel">Water Availability</label>
+          <select id="f_water" class="textfield">
+            <option value="Low">Low (Rainfed / scarce)</option>
+            <option value="Medium" selected>Medium (Borewell / canal)</option>
+            <option value="High">High (Abundant / flood irrigated)</option>
+          </select>
+
+          <label class="fieldlabel">Growing Season</label>
+          <select id="f_season" class="textfield">
+            <option value="Kharif" selected>Kharif (Monsoon / Summer)</option>
+            <option value="Rabi">Rabi (Winter / Post-monsoon)</option>
+            <option value="Zaid">Zaid (Dry hot summer)</option>
+          </select>
+
+          <button id="recBtn" class="btn-primary big" onclick="calculateRecommendations()">Get Recommendations</button>
+        </div>
+
+        <div id="resultsSection" style="display:none;">
+          <p class="hint">Ranked by agronomic suitability for your exact farm conditions:</p>
+          <div id="recommendationResults" class="reslist"></div>
+          <button class="btn-secondary big" style="margin-top: 18px;" onclick="resetForm()">↻ Try Different Conditions</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/farmy-data.js"></script>
+  <script src="js/farmy-core.js"></script>
+  <script>
+    async function calculateRecommendations() {
+      const btn = $('#recBtn');
+      btn.textContent = 'Analyzing crops…';
+      btn.disabled = true;
+
+      const cond = {
+        soil: $('#f_soil').value,
+        ph: parseFloat($('#f_ph').value) || 6.5,
+        temp: parseFloat($('#f_temp').value) || 27,
+        waterAvail: $('#f_water').value,
+        season: $('#f_season').value
+      };
+
+      let results = [];
+      if (FarmyState.backendOnline) {
+        try {
+          const apiRes = await apiFetch('/recommend', {
+            method: 'POST',
+            body: JSON.stringify(cond)
+          });
+          results = apiRes.map(r => ({
+            crop: findCrop(r.crop.id) || r.crop,
+            score: r.score,
+            label: r.label,
+            cls: r.score >= 80 ? 'great' : r.score >= 60 ? 'good' : r.score >= 40 ? 'ok' : 'bad',
+            reasons: r.reasons
+          }));
+        } catch (e) {
+          console.warn('Live API recommend failed, using local engine:', e.message);
+          results = runRecommendationLocal(cond);
+        }
+      } else {
+        results = runRecommendationLocal(cond);
+      }
+
+      btn.textContent = 'Get Recommendations';
+      btn.disabled = false;
+
+      renderResults(results);
+    }
+
+    function renderResults(results) {
+      $('#formSection').style.display = 'none';
+      $('#resultsSection').style.display = 'block';
+
+      const container = $('#recommendationResults');
+      container.innerHTML = results.map(r => `
+        <a href="crop-detail.html?id=${encodeURIComponent(r.crop.id)}" class="rescard">
+          <div class="rescard-top">
+            <span class="chipemoji">${r.crop.emoji}</span>
+            <div class="rescard-name">
+              ${r.crop.name}
+              <div class="rescard-sci">${r.crop.sci} · ${r.crop.category}</div>
+            </div>
+            <span class="badge ${r.cls}">${r.label}</span>
+          </div>
+          <div class="scorebar"><div class="scorebar-fill ${r.cls}" style="width:${r.score}%"></div></div>
+          <div class="score-num">${r.score} / 100 Match</div>
+          <ul class="reasonlist">
+            ${r.reasons.slice(0, 3).map(rs => `<li class="${rs.ok ? 'ok' : 'no'}">${rs.ok ? '✓' : '✕'} ${rs.text}</li>`).join('')}
+          </ul>
+        </a>
+      `).join('');
+
+      window.scrollTo(0, 0);
+    }
+
+    function resetForm() {
+      $('#resultsSection').style.display = 'none';
+      $('#formSection').style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderBottomNav('recommend');
+      checkBackend();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Yield Prediction — FARMY</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/farmy.css">
+</head>
+<body>
+  <div id="appwrap">
+    <div class="screen">
+      <div class="topbar">
+        <a href="index.html" class="iconbtn">←</a>
+        <h1>Yield Prediction</h1>
+        <span class="iconbtn spacer"></span>
+      </div>
+
+      <div class="content">
+        <p class="hint">Estimate expected production output based on farm area, soil condition, and farming practices.</p>
+
+        <label class="fieldlabel">Select Crop</label>
+        <select id="y_crop" class="textfield"></select>
+
+        <label class="fieldlabel">Farm Area (Acres)</label>
+        <input id="y_area" class="textfield" type="number" value="1.0" min="0.1" step="0.1">
+
+        <label class="fieldlabel">Soil Health Score (0–100)</label>
+        <input id="y_soil" class="textfield" type="number" min="0" max="100" value="70">
+
+        <label class="fieldlabel">Farming Method</label>
+        <select id="y_method" class="textfield">
+          <option value="conventional" selected>Conventional (Standard fertilizers & protection)</option>
+          <option value="organic">Organic / Natural (Bio-inputs, zero chemical)</option>
+        </select>
+
+        <button id="yieldBtn" class="btn-primary big" onclick="calculateYield()">Estimate Expected Yield</button>
+
+        <div id="yieldResultContainer"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/farmy-data.js"></script>
+  <script src="js/farmy-core.js"></script>
+  <script>
+    function initInputs() {
+      const select = $('#y_crop');
+      const crops = window.CROPS || [];
+      select.innerHTML = crops.map(c => `<option value="${c.id}">${c.emoji} ${c.name}</option>`).join('');
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const preselectCrop = urlParams.get('crop');
+      if (preselectCrop) select.value = preselectCrop;
+
+      const preselectArea = urlParams.get('area');
+      if (preselectArea) $('#y_area').value = preselectArea;
+
+      if (FarmyState.soilResult && FarmyState.soilResult.health) {
+        $('#y_soil').value = FarmyState.soilResult.health.score;
+      }
+    }
+
+    async function calculateYield() {
+      const btn = $('#yieldBtn');
+      btn.textContent = 'Calculating…';
+      btn.disabled = true;
+
+      const cropId = $('#y_crop').value;
+      const crop = findCrop(cropId);
+      const area = parseFloat($('#y_area').value) || 1.0;
+      const soil = parseFloat($('#y_soil').value) || 70;
+      const method = $('#y_method').value;
+
+      let result;
+      if (FarmyState.backendOnline) {
+        try {
+          const res = await apiFetch('/yield/predict', {
+            method: 'POST',
+            body: JSON.stringify({
+              cropId,
+              areaAcres: area,
+              soilHealthScore: soil,
+              farmingMethod: method
+            })
+          });
+          result = { low: res.low, high: res.high, unit: res.unit || 'kg' };
+        } catch (e) {
+          result = predictYieldLocal(crop, area, soil, method);
+        }
+      } else {
+        result = predictYieldLocal(crop, area, soil, method);
+      }
+
+      btn.textContent = 'Estimate Expected Yield';
+      btn.disabled = false;
+
+      const avgYield = Math.round((result.low + result.high) / 2);
+      $('#yieldResultContainer').innerHTML = `
+        <div class="resultbox">
+          <div class="resultbox-title">Estimated Yield Range</div>
+          <div class="resultbox-big">${result.low.toLocaleString()} – ${result.high.toLocaleString()} ${result.unit}</div>
+          <p style="margin: 8px 0 14px; font-size: 13.5px; color: var(--ink-soft);">
+            Average expectation: <b>~${avgYield.toLocaleString()} ${result.unit}</b> (${(avgYield / (area * 100)).toFixed(1)} quintals/acre)
+          </p>
+          <div class="notebox warn">
+            ⚠️ Actual yield depends on monsoon regularity, pest control timing, and day-to-day farm management.
+          </div>
+          <a href="profit.html?yield=${avgYield}&area=${area}&price=${crop.priceEstimate || 15}" class="btn-primary big" style="margin-top: 14px;">
+            Calculate Financial Profit →
+          </a>
+        </div>
+      `;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initInputs();
+      renderBottomNav('tools');
+      checkBackend();
+    });
+  </script>
+</body>
+</html>

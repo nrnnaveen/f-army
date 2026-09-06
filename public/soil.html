@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Soil Check — FARMY</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/farmy.css">
+</head>
+<body>
+  <div id="appwrap">
+    <div class="screen">
+      <div class="topbar">
+        <a href="index.html" class="iconbtn">←</a>
+        <h1>Soil Health Check</h1>
+        <span class="iconbtn spacer"></span>
+      </div>
+
+      <div class="content">
+        <div id="soilInputSection">
+          <p class="hint">Enter your soil test values or field observations to check nutrient balance and crop compatibility.</p>
+
+          <label class="fieldlabel">Soil Type</label>
+          <select id="s_type" class="textfield">
+            <option value="Loamy">Loamy</option>
+            <option value="Sandy loam" selected>Sandy loam</option>
+            <option value="Sandy">Sandy</option>
+            <option value="Clay">Clay</option>
+            <option value="Clay loam">Clay loam</option>
+          </select>
+
+          <label class="fieldlabel">Soil pH</label>
+          <input id="s_ph" class="textfield" type="number" step="0.1" min="4.0" max="9.5" value="6.5">
+
+          <label class="fieldlabel">Nitrogen (N) Level</label>
+          <select id="s_n" class="textfield">
+            <option value="Low">Low</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="High">High</option>
+          </select>
+
+          <label class="fieldlabel">Phosphorus (P) Level</label>
+          <select id="s_p" class="textfield">
+            <option value="Low">Low</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="High">High</option>
+          </select>
+
+          <label class="fieldlabel">Potassium (K) Level</label>
+          <select id="s_k" class="textfield">
+            <option value="Low">Low</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="High">High</option>
+          </select>
+
+          <label class="fieldlabel">Soil Moisture</label>
+          <select id="s_moist" class="textfield">
+            <option value="Low">Low (Dry)</option>
+            <option value="Medium" selected>Medium (Adequate)</option>
+            <option value="High">High (Wet / waterlogged)</option>
+          </select>
+
+          <button id="soilBtn" class="btn-primary big" onclick="handleSoilCheck()">Check Soil Health</button>
+        </div>
+
+        <div id="soilResultSection" style="display:none;">
+          <div class="scorecircle-wrap">
+            <div id="soilScoreCircle" class="scorecircle good">75</div>
+            <div id="soilScoreLabel" class="scorecirc-label">Good soil health</div>
+          </div>
+
+          <div id="soilNotesContainer"></div>
+
+          <h3 class="subhead">Compare with a Crop</h3>
+          <select id="s_cropSelect" class="textfield" onchange="updateCropComparison()"></select>
+          <div id="soilCropCompare" style="margin-top: 10px;"></div>
+
+          <button class="btn-secondary big" style="margin-top: 20px;" onclick="resetSoilForm()">↻ New Soil Check</button>
+          <a href="yield.html" class="btn-primary big" style="margin-top: 10px;">Estimate Yield With This Soil →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/farmy-data.js"></script>
+  <script src="js/farmy-core.js"></script>
+  <script>
+    let currentSoilInput = null;
+
+    function populateCropSelect() {
+      const select = $('#s_cropSelect');
+      const crops = window.CROPS || [];
+      select.innerHTML = crops.map(c => `<option value="${c.id}">${c.emoji} ${c.name}</option>`).join('');
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const preselectedCrop = urlParams.get('crop');
+      if (preselectedCrop) {
+        select.value = preselectedCrop;
+      }
+    }
+
+    async function handleSoilCheck() {
+      const btn = $('#soilBtn');
+      btn.textContent = 'Calculating…';
+      btn.disabled = true;
+
+      const s = {
+        type: $('#s_type').value,
+        ph: parseFloat($('#s_ph').value) || 6.5,
+        n: $('#s_n').value,
+        p: $('#s_p').value,
+        k: $('#s_k').value,
+        moisture: $('#s_moist').value
+      };
+      currentSoilInput = s;
+
+      let health;
+      if (FarmyState.backendOnline) {
+        try {
+          const res = await apiFetch('/soil/check', {
+            method: 'POST',
+            body: JSON.stringify({
+              soilType: s.type,
+              ph: s.ph,
+              nitrogenLevel: s.n,
+              phosphorusLevel: s.p,
+              potassiumLevel: s.k,
+              moistureLevel: s.moisture
+            })
+          });
+          health = { score: res.score, label: res.label, notes: res.notes };
+        } catch (e) {
+          console.warn('Backend soil check failed, using local score:', e.message);
+          health = soilHealthScoreLocal(s);
+        }
+      } else {
+        health = soilHealthScoreLocal(s);
+      }
+
+      FarmyState.saveSoilResult({ input: s, health });
+
+      btn.textContent = 'Check Soil Health';
+      btn.disabled = false;
+
+      renderSoilResult(health);
+    }
+
+    function renderSoilResult(health) {
+      $('#soilInputSection').style.display = 'none';
+      $('#soilResultSection').style.display = 'block';
+
+      const circle = $('#soilScoreCircle');
+      circle.textContent = health.score;
+      circle.className = `scorecircle ${health.score >= 75 ? 'great' : health.score >= 50 ? 'good' : 'bad'}`;
+      $('#soilScoreLabel').textContent = `${health.label} soil health (${health.score}/100)`;
+
+      const notesCont = $('#soilNotesContainer');
+      if (health.notes && health.notes.length) {
+        notesCont.innerHTML = `<ul class="reasonlist">${health.notes.map(n => `<li class="no">⚠️ ${n}</li>`).join('')}</ul>`;
+      } else {
+        notesCont.innerHTML = `<p class="notebox">✅ Your soil is well balanced with good nutrient and pH conditions.</p>`;
+      }
+
+      updateCropComparison();
+      window.scrollTo(0, 0);
+    }
+
+    function updateCropComparison() {
+      if (!currentSoilInput) return;
+      const cropId = $('#s_cropSelect').value;
+      const crop = findCrop(cropId);
+      const msgs = compareSoilToCropLocal(currentSoilInput, crop);
+      $('#soilCropCompare').innerHTML = `<ul class="reasonlist">${msgs.map(m => `<li>${m.icon} ${m.text}</li>`).join('')}</ul>`;
+    }
+
+    function resetSoilForm() {
+      $('#soilResultSection').style.display = 'none';
+      $('#soilInputSection').style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      populateCropSelect();
+      renderBottomNav('tools');
+      checkBackend();
+
+      // Check if previous soil result exists
+      if (FarmyState.soilResult) {
+        currentSoilInput = FarmyState.soilResult.input;
+        renderSoilResult(FarmyState.soilResult.health);
+      }
+    });
+  </script>
+</body>
+</html>

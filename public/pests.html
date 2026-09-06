@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Pest & Disease Check — FARMY</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/farmy.css">
+</head>
+<body>
+  <div id="appwrap">
+    <div class="screen">
+      <div class="topbar">
+        <a href="index.html" class="iconbtn">←</a>
+        <h1>Pest & Disease Check</h1>
+        <span class="iconbtn spacer"></span>
+      </div>
+
+      <div class="content">
+        <p class="hint">Select visible symptoms to identify likely pests or diseases and safe IPM control methods:</p>
+
+        <div id="symptomChips" class="chipgrid">
+          <button class="symptomchip" onclick="toggleSymptom('Yellow leaves', this)">Yellow leaves</button>
+          <button class="symptomchip" onclick="toggleSymptom('Brown spots', this)">Brown spots</button>
+          <button class="symptomchip" onclick="toggleSymptom('Holes in leaves', this)">Holes in leaves</button>
+          <button class="symptomchip" onclick="toggleSymptom('Wilting', this)">Wilting</button>
+          <button class="symptomchip" onclick="toggleSymptom('Insects visible', this)">Insects visible</button>
+          <button class="symptomchip" onclick="toggleSymptom('Mold or fungus', this)">Mold or fungus</button>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <label class="fieldlabel">Filter by specific crop (optional)</label>
+          <select id="pestCropSelect" class="textfield" onchange="runPestMatch()">
+            <option value="">All Crops</option>
+          </select>
+        </div>
+
+        <div id="pestResultsContainer">
+          <p class="hint">Select one or more symptoms above to see potential causes.</p>
+        </div>
+
+        <div class="notebox warn" style="margin-top: 24px;">
+          ⚠️ <b>Pesticide Safety Advisory:</b> Prioritize organic & mechanical controls. Always adhere to official label rates, protective gear (PPE), and Pre-Harvest Intervals (PHI).
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/farmy-data.js"></script>
+  <script src="js/farmy-core.js"></script>
+  <script>
+    const selectedSymptoms = new Set();
+
+    function populateCropFilter() {
+      const sel = $('#pestCropSelect');
+      const crops = window.CROPS || [];
+      crops.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = `${c.emoji} ${c.name}`;
+        sel.appendChild(opt);
+      });
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const preselect = urlParams.get('crop');
+      if (preselect) {
+        sel.value = preselect;
+      }
+    }
+
+    function toggleSymptom(symptom, btn) {
+      if (selectedSymptoms.has(symptom)) {
+        selectedSymptoms.delete(symptom);
+        btn.classList.remove('active');
+      } else {
+        selectedSymptoms.add(symptom);
+        btn.classList.add('active');
+      }
+      runPestMatch();
+    }
+
+    async function runPestMatch() {
+      const container = $('#pestResultsContainer');
+      const symptoms = Array.from(selectedSymptoms);
+
+      if (!symptoms.length) {
+        container.innerHTML = `<p class="hint">Select one or more symptoms above to see likely causes.</p>`;
+        return;
+      }
+
+      container.innerHTML = `<p class="hint">Diagnosing symptoms…</p>`;
+
+      let matches = [];
+      if (FarmyState.backendOnline) {
+        try {
+          const apiRes = await apiFetch('/pests/match', {
+            method: 'POST',
+            body: JSON.stringify({ symptoms })
+          });
+          matches = apiRes.map(p => ({
+            id: p.id,
+            name: p.name,
+            type: p.type,
+            cause: p.cause,
+            prevention: p.prevention || [],
+            organic: p.organic_control || [],
+            mechanical: p.mechanical_control || [],
+            chemical: {
+              active: p.chemical_active_ingredient,
+              warning: p.chemical_warning,
+              ppe: p.chemical_ppe,
+              phi: p.chemical_phi
+            }
+          }));
+        } catch (e) {
+          matches = pestMatchLocal(symptoms);
+        }
+      } else {
+        matches = pestMatchLocal(symptoms);
+      }
+
+      // Filter by crop if selected
+      const selectedCropId = $('#pestCropSelect').value;
+      if (selectedCropId) {
+        const crop = findCrop(selectedCropId);
+        if (crop && crop.pests) {
+          matches = matches.filter(m => crop.pests.includes(m.id));
+        }
+      }
+
+      if (!matches.length) {
+        container.innerHTML = `
+          <div class="emptystate">
+            <div class="emptystate-emoji">🔍</div>
+            <h3>No direct match</h3>
+            <p>Try toggling other symptoms or clear the crop filter to view all potential diagnoses.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="reslist">
+          ${matches.slice(0, 6).map(p => `
+            <div class="pestcard">
+              <div class="pestcard-top">
+                <span class="badge ${p.type === 'Pest' ? 'ok' : 'warn2'}">${p.type}</span>
+                <span class="pestname">${p.name}</span>
+              </div>
+              <p class="pest-cause">${p.cause}</p>
+              <details>
+                <summary>Prevention & IPM Treatments</summary>
+                <b>Prevention</b>
+                <ul>${(p.prevention || []).map(x => `<li>${x}</li>`).join('')}</ul>
+                <b>Organic Control</b>
+                <ul>${(p.organic || []).map(x => `<li>${x}</li>`).join('')}</ul>
+                <b>Mechanical / Physical</b>
+                <ul>${(p.mechanical || []).map(x => `<li>${x}</li>`).join('')}</ul>
+                ${p.chemical && p.chemical.active && !/No (reliable curative|direct cure)/i.test(p.chemical.active) ? `
+                  <b>Chemical Control (Use as last resort)</b>
+                  <ul>
+                    <li><b>Active ingredient:</b> ${p.chemical.active}</li>
+                    <li>${p.chemical.warning}</li>
+                    <li><b>PPE:</b> ${p.chemical.ppe}</li>
+                    <li><b>Pre-harvest interval:</b> ${p.chemical.phi}</li>
+                  </ul>
+                ` : `<p class="notebox">${(p.chemical && p.chemical.active) || 'No chemical cure — focus on prevention and resistant cultivars.'}</p>`}
+              </details>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      populateCropFilter();
+      renderBottomNav('tools');
+      checkBackend();
+    });
+  </script>
+</body>
+</html>

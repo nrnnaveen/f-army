@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Profit Calculator — FARMY</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/farmy.css">
+</head>
+<body>
+  <div id="appwrap">
+    <div class="screen">
+      <div class="topbar">
+        <a href="index.html" class="iconbtn">←</a>
+        <h1>Profit Calculator</h1>
+        <span class="iconbtn spacer"></span>
+      </div>
+
+      <div class="content">
+        <p class="hint">Estimate costs, revenues, and projected net earnings for your farming season.</p>
+
+        <label class="fieldlabel">Farm Area (Acres)</label>
+        <input id="p_area" class="textfield" type="number" step="0.1" min="0.1" value="1.0">
+
+        <h3 class="subhead">Operational Costs (₹)</h3>
+        <label class="fieldlabel">Seeds & Saplings</label>
+        <input id="p_seed" class="textfield" type="number" value="3000">
+
+        <label class="fieldlabel">Fertilizers & Soil Amendments</label>
+        <input id="p_fert" class="textfield" type="number" value="4000">
+
+        <label class="fieldlabel">Labour & Weeding</label>
+        <input id="p_labour" class="textfield" type="number" value="8000">
+
+        <label class="fieldlabel">Irrigation, Fuel & Machinery</label>
+        <input id="p_irrig" class="textfield" type="number" value="3000">
+
+        <label class="fieldlabel">Crop Protection & Other Expenses</label>
+        <input id="p_other" class="textfield" type="number" value="2000">
+
+        <h3 class="subhead">Market Output</h3>
+        <label class="fieldlabel">Expected Total Yield (kg)</label>
+        <input id="p_yield" class="textfield" type="number" value="10000">
+
+        <label class="fieldlabel">Expected Mandi / Selling Price (₹/kg)</label>
+        <input id="p_price" class="textfield" type="number" step="0.5" value="12">
+
+        <button id="profitBtn" class="btn-primary big" onclick="calculateProfit()">Calculate Net Profit</button>
+
+        <div id="profitResultContainer"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/farmy-data.js"></script>
+  <script src="js/farmy-core.js"></script>
+  <script>
+    function initQueryParams() {
+      const p = new URLSearchParams(window.location.search);
+      if (p.get('area')) $('#p_area').value = p.get('area');
+      if (p.get('yield')) $('#p_yield').value = p.get('yield');
+      if (p.get('price')) $('#p_price').value = p.get('price');
+    }
+
+    async function calculateProfit() {
+      const btn = $('#profitBtn');
+      btn.textContent = 'Calculating…';
+      btn.disabled = true;
+
+      const payload = {
+        areaAcres: parseFloat($('#p_area').value) || 1,
+        seedCost: parseFloat($('#p_seed').value) || 0,
+        fertilizerCost: parseFloat($('#p_fert').value) || 0,
+        labourCost: parseFloat($('#p_labour').value) || 0,
+        irrigationCost: parseFloat($('#p_irrig').value) || 0,
+        otherCost: parseFloat($('#p_other').value) || 0,
+        expectedYield: parseFloat($('#p_yield').value) || 0,
+        sellingPrice: parseFloat($('#p_price').value) || 0
+      };
+
+      let r;
+      if (FarmyState.backendOnline) {
+        try {
+          const res = await apiFetch('/profit/calculate', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+          r = {
+            cost: res.totalCost,
+            revenue: res.expectedRevenue,
+            profit: res.estimatedProfit,
+            perAcre: res.profitPerAcre
+          };
+        } catch (e) {
+          r = calcProfitLocal(payload);
+        }
+      } else {
+        r = calcProfitLocal(payload);
+      }
+
+      btn.textContent = 'Calculate Net Profit';
+      btn.disabled = false;
+
+      const isPositive = r.profit >= 0;
+      $('#profitResultContainer').innerHTML = `
+        <div class="resultbox">
+          <div class="pl-row"><span>Total Production Cost</span><b>₹${r.cost.toLocaleString()}</b></div>
+          <div class="pl-row"><span>Gross Expected Revenue</span><b>₹${r.revenue.toLocaleString()}</b></div>
+          <div class="pl-row total ${isPositive ? 'pos' : 'neg'}">
+            <span>Estimated Net Profit</span>
+            <b>₹${r.profit.toLocaleString()}</b>
+          </div>
+          <div class="pl-row">
+            <span>Net Profit per Acre</span>
+            <b>₹${r.perAcre.toLocaleString()}</b>
+          </div>
+          <div class="notebox warn" style="margin-top: 14px;">
+            ⚠️ <b>Market Reminder:</b> Mandi prices fluctuate daily based on local arrivals. Check current wholesale rates before harvesting and selling.
+          </div>
+        </div>
+      `;
+      window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initQueryParams();
+      renderBottomNav('tools');
+      checkBackend();
+    });
+  </script>
+</body>
+</html>

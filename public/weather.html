@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Weather Advisory — FARMY</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/farmy.css">
+</head>
+<body>
+  <div id="appwrap">
+    <div class="screen">
+      <div class="topbar">
+        <a href="index.html" class="iconbtn">←</a>
+        <h1>Weather & Advisory</h1>
+        <span class="iconbtn spacer"></span>
+      </div>
+
+      <div class="content">
+        <div class="backend-status-pill"></div>
+
+        <div class="weather-big">
+          <div id="wTempBig" class="wtemp-big">29°C</div>
+          <div id="wCondBig" style="font-weight: 600; font-size: 16px;">Partly cloudy</div>
+          <div id="wSubBig" class="wsub">Humidity 68% · Rain chance 30%</div>
+        </div>
+
+        <h3 class="subhead">5-Day Forecast</h3>
+        <div id="forecastRow" class="forecastrow"></div>
+
+        <div id="weatherAlertsBox"></div>
+
+        <h3 class="subhead" style="margin-top: 24px;">Check Suitability for a Crop</h3>
+        <select id="w_cropSelect" class="textfield" onchange="updateWeatherCropCompare()"></select>
+        <div id="weatherCompareResult" style="margin-top: 14px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/farmy-data.js"></script>
+  <script src="js/farmy-core.js"></script>
+  <script>
+    let currentWeather = null;
+
+    function populateCropSelect() {
+      const sel = $('#w_cropSelect');
+      const crops = window.CROPS || [];
+      sel.innerHTML = crops.map(c => `<option value="${c.id}">${c.emoji} ${c.name}</option>`).join('');
+    }
+
+    async function loadWeatherData() {
+      if (FarmyState.backendOnline) {
+        try {
+          const res = await apiFetch('/weather?lat=13.0827&lng=80.2707');
+          currentWeather = res;
+        } catch (e) {
+          console.warn('Backend weather fetch failed, using demo data:', e.message);
+          currentWeather = getWeatherDemo();
+        }
+      } else {
+        currentWeather = getWeatherDemo();
+      }
+
+      renderWeather(currentWeather);
+    }
+
+    function renderWeather(w) {
+      $('#wTempBig').textContent = `${w.temp}°C`;
+      $('#wCondBig').textContent = w.condition;
+      $('#wSubBig').textContent = `Humidity ${w.humidity}% · Rain chance ${w.rainChance}%`;
+
+      const forecastCont = $('#forecastRow');
+      forecastCont.innerHTML = (w.forecast || []).map(f => `
+        <div class="forecastday">
+          <div>${f.d}</div>
+          <div class="fc-t">${f.t}°</div>
+          <div class="fc-r">💧${f.r}%</div>
+        </div>
+      `).join('');
+
+      const alerts = weatherAlerts(w);
+      const alertsCont = $('#weatherAlertsBox');
+      if (alerts.length) {
+        alertsCont.innerHTML = `
+          <div class="alertbox">
+            ${alerts.map(a => `<div class="alertrow">${a.icon} ${a.text}</div>`).join('')}
+          </div>
+        `;
+      } else {
+        alertsCont.innerHTML = '';
+      }
+
+      updateWeatherCropCompare();
+    }
+
+    function updateWeatherCropCompare() {
+      if (!currentWeather) return;
+      const cropId = $('#w_cropSelect').value;
+      const crop = findCrop(cropId);
+      const { msgs, score } = weatherSuitability(crop, currentWeather);
+
+      const verdict = score >= 80
+        ? `✅ Weather is suitable for growing ${crop.name}`
+        : score >= 55
+        ? `⚠️ Weather is borderline for ${crop.name}`
+        : `❌ Weather is currently unfavourable for ${crop.name}`;
+
+      const cls = score >= 80 ? 'great' : score >= 55 ? 'ok' : 'bad';
+
+      $('#weatherCompareResult').innerHTML = `
+        <div class="scorecircle-wrap">
+          <div class="scorecircle ${cls}">${score}</div>
+          <div class="scorecirc-label">${verdict}</div>
+        </div>
+        <ul class="reasonlist" style="margin-top: 14px;">
+          ${msgs.map(m => `<li>${m.icon} ${m.text}</li>`).join('')}
+        </ul>
+      `;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      populateCropSelect();
+      renderBottomNav('tools');
+      checkBackend(() => {
+        loadWeatherData();
+      });
+      loadWeatherData();
+    });
+  </script>
+</body>
+</html>

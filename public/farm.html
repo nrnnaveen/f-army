@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>My Farm — FARMY</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/farmy.css">
+</head>
+<body>
+  <div id="appwrap">
+    <div class="screen">
+      <div class="topbar">
+        <a href="index.html" class="iconbtn">←</a>
+        <h1>My Farm Tracker</h1>
+        <a href="crops.html" class="iconbtn" title="Add Crop">+</a>
+      </div>
+
+      <div class="content">
+        <div id="farmListContainer"></div>
+        <a href="crops.html" class="btn-secondary big" style="margin-top: 14px;">➕ Add Another Crop</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/farmy-data.js"></script>
+  <script src="js/farmy-core.js"></script>
+  <script>
+    function renderFarm() {
+      const container = $('#farmListContainer');
+      const farmCrops = FarmyState.myFarm || [];
+
+      if (!farmCrops.length) {
+        container.innerHTML = `
+          <div class="emptystate">
+            <div class="emptystate-emoji">🌱</div>
+            <h3>No crops added yet</h3>
+            <p>Add crops you've sown to automatically calculate growth stages, watering needs, and harvest schedules.</p>
+            <a href="crops.html" class="btn-primary big">Browse Crop Catalog</a>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = farmCrops.map((f, i) => {
+        const crop = findCrop(f.cropId);
+        if (!crop) return '';
+
+        const plantedTime = new Date(f.plantedDate).getTime();
+        const daysSince = isNaN(plantedTime) ? 0 : Math.max(0, Math.floor((Date.now() - plantedTime) / 86400000));
+        const stage = getCropGrowthStage(crop, daysSince);
+
+        const harvestDateObj = new Date(plantedTime + (crop.duration || 100) * 86400000);
+        const harvestDate = isNaN(harvestDateObj.getTime())
+          ? 'Calculating…'
+          : harvestDateObj.toISOString().slice(0, 10);
+
+        return `
+          <div class="farmcard">
+            <div class="farmcard-top">
+              <span class="chipemoji">${crop.emoji}</span>
+              <div style="flex:1;">
+                <div class="listrow-name">${crop.name}</div>
+                <div class="listrow-sub">${f.area || 1} acre(s) · Planted on ${f.plantedDate}</div>
+              </div>
+              <button class="iconbtn" onclick="removeCrop(${i})" title="Remove crop">🗑</button>
+            </div>
+
+            <div class="infogrid">
+              <div class="infobox">
+                <div class="infolabel">Days since planting</div>
+                <div class="infoval">${daysSince} days</div>
+              </div>
+              <div class="infobox">
+                <div class="infolabel">Current stage</div>
+                <div class="infoval">${stage.name}</div>
+              </div>
+              <div class="infobox">
+                <div class="infolabel">Irrigation rule</div>
+                <div class="infoval">${crop.irrigation.split(';')[0]}</div>
+              </div>
+              <div class="infobox">
+                <div class="infolabel">Expected harvest</div>
+                <div class="infoval">${harvestDate}</div>
+              </div>
+            </div>
+
+            ${stage.warn ? `<div class="notebox warn" style="margin-bottom: 12px;">⚠️ <b>Stage advisory:</b> ${stage.warn}</div>` : ''}
+
+            <div style="display:flex; gap:10px;">
+              <a href="crop-detail.html?id=${encodeURIComponent(crop.id)}" class="btn-secondary" style="flex:1; margin-top:0;">View Guide →</a>
+              <a href="yield.html?crop=${encodeURIComponent(crop.id)}&area=${f.area || 1}" class="btn-secondary" style="flex:1; margin-top:0;">Estimate Yield</a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function removeCrop(index) {
+      if (confirm('Are you sure you want to remove this crop from My Farm?')) {
+        const farm = FarmyState.myFarm || [];
+        farm.splice(index, 1);
+        FarmyState.saveMyFarm(farm);
+        renderFarm();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderBottomNav('farm');
+      renderFarm();
+      checkBackend();
+    });
+  </script>
+</body>
+</html>
