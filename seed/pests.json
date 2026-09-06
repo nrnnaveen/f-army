@@ -1,0 +1,802 @@
+{
+  "aphid": {
+    "name": "Aphids",
+    "type": "Pest",
+    "tags": [
+      "insects visible",
+      "yellow leaves",
+      "mold or fungus"
+    ],
+    "cause": "Small sap-sucking insects that cluster on new growth and undersides of leaves; thrive in warm, dry weather",
+    "prevention": [
+      "Encourage natural predators (ladybirds, lacewings)",
+      "Avoid excess nitrogen which encourages soft new growth",
+      "Use yellow sticky traps to monitor early"
+    ],
+    "organic": [
+      "Spray neem oil solution every 7 days",
+      "Introduce ladybird beetles",
+      "Strong water spray to dislodge colonies"
+    ],
+    "mechanical": [
+      "Remove and destroy heavily infested shoots"
+    ],
+    "chemical": {
+      "active": "Imidacloprid (as locally approved)",
+      "warning": "Only use if organic controls fail and infestation is severe",
+      "ppe": "Gloves, mask, long sleeves",
+      "phi": "Follow label pre-harvest interval, typically 7–14 days"
+    }
+  },
+  "earlyblight": {
+    "name": "Early Blight",
+    "type": "Disease",
+    "tags": [
+      "brown spots",
+      "yellow leaves"
+    ],
+    "cause": "Fungal disease (Alternaria) favoured by warm, humid conditions and leaf wetness",
+    "prevention": [
+      "Rotate crops, avoid planting tomato/potato repeatedly in same field",
+      "Ensure good spacing for airflow",
+      "Remove infected plant debris"
+    ],
+    "organic": [
+      "Spray copper-based fungicide preventively",
+      "Neem oil as a preventive spray"
+    ],
+    "mechanical": [
+      "Prune lower infected leaves and destroy them"
+    ],
+    "chemical": {
+      "active": "Mancozeb (as locally approved)",
+      "warning": "Apply preventively, not after heavy infection",
+      "ppe": "Gloves, mask",
+      "phi": "Follow label, typically 5–7 days"
+    }
+  },
+  "fruitborer": {
+    "name": "Fruit Borer",
+    "type": "Pest",
+    "tags": [
+      "holes in leaves",
+      "insects visible"
+    ],
+    "cause": "Moth larvae that bore into fruit and shoots",
+    "prevention": [
+      "Use pheromone traps to monitor and trap adult moths",
+      "Remove and destroy damaged fruit promptly",
+      "Intercrop with marigold as a trap crop"
+    ],
+    "organic": [
+      "Spray Bacillus thuringiensis (Bt)",
+      "Neem seed kernel extract spray"
+    ],
+    "mechanical": [
+      "Hand-pick and destroy infested fruit/shoots"
+    ],
+    "chemical": {
+      "active": "Emamectin benzoate (as locally approved)",
+      "warning": "Rotate chemical classes to avoid resistance",
+      "ppe": "Gloves, mask, eye protection",
+      "phi": "Follow label, typically 3–5 days"
+    }
+  },
+  "wilt": {
+    "name": "Bacterial/Fusarium Wilt",
+    "type": "Disease",
+    "tags": [
+      "wilting"
+    ],
+    "cause": "Soil-borne bacteria or fungus blocking water transport in the plant",
+    "prevention": [
+      "Practice crop rotation with non-host crops",
+      "Use resistant varieties where available",
+      "Improve field drainage"
+    ],
+    "organic": [
+      "Soil solarization before planting",
+      "Apply Trichoderma-enriched compost"
+    ],
+    "mechanical": [
+      "Remove and destroy wilted plants immediately, do not compost"
+    ],
+    "chemical": {
+      "active": "No reliable curative chemical control",
+      "warning": "Focus on prevention and resistant varieties",
+      "ppe": "—",
+      "phi": "—"
+    }
+  },
+  "lateblight": {
+    "name": "Late Blight",
+    "type": "Disease",
+    "tags": [
+      "brown spots",
+      "mold or fungus",
+      "wilting"
+    ],
+    "cause": "Fungus-like pathogen (Phytophthora) spreading fast in cool, wet, humid weather",
+    "prevention": [
+      "Use certified disease-free seed tubers",
+      "Avoid overhead irrigation in cool weather",
+      "Ensure good field drainage"
+    ],
+    "organic": [
+      "Preventive copper-based fungicide spray"
+    ],
+    "mechanical": [
+      "Destroy infected foliage immediately"
+    ],
+    "chemical": {
+      "active": "Metalaxyl + Mancozeb (as locally approved)",
+      "warning": "Apply before rain in high-risk weather, resistance can develop",
+      "ppe": "Gloves, mask",
+      "phi": "Follow label, typically 7 days"
+    }
+  },
+  "cutworm": {
+    "name": "Cutworm",
+    "type": "Pest",
+    "tags": [
+      "holes in leaves",
+      "wilting"
+    ],
+    "cause": "Caterpillars that cut young stems at soil level, active at night",
+    "prevention": [
+      "Deep ploughing before planting exposes larvae to predators/sun",
+      "Remove weeds which host larvae"
+    ],
+    "organic": [
+      "Neem cake application to soil",
+      "Hand-collect larvae at dusk"
+    ],
+    "mechanical": [
+      "Place collars around stems of young transplants"
+    ],
+    "chemical": {
+      "active": "Chlorpyrifos soil application (as locally approved)",
+      "warning": "Use only as last resort, harmful to soil organisms",
+      "ppe": "Gloves, mask",
+      "phi": "Follow label strictly"
+    }
+  },
+  "thrips": {
+    "name": "Thrips",
+    "type": "Pest",
+    "tags": [
+      "insects visible",
+      "yellow leaves"
+    ],
+    "cause": "Tiny slender insects that scrape and suck plant tissue, thrive in hot dry weather",
+    "prevention": [
+      "Blue sticky traps for monitoring",
+      "Avoid water stress which increases susceptibility"
+    ],
+    "organic": [
+      "Neem oil spray every 5–7 days"
+    ],
+    "mechanical": [
+      "Remove weeds around field that host thrips"
+    ],
+    "chemical": {
+      "active": "Spinosad (as locally approved)",
+      "warning": "Rotate with different chemical classes",
+      "ppe": "Gloves, mask",
+      "phi": "Follow label, typically 3–5 days"
+    }
+  },
+  "purpleblotch": {
+    "name": "Purple Blotch",
+    "type": "Disease",
+    "tags": [
+      "brown spots",
+      "mold or fungus"
+    ],
+    "cause": "Fungal disease favoured by humid weather and dense planting",
+    "prevention": [
+      "Avoid overcrowded planting for airflow",
+      "Rotate crops"
+    ],
+    "organic": [
+      "Copper-based fungicide, preventive spray"
+    ],
+    "mechanical": [
+      "Remove and destroy infected leaves"
+    ],
+    "chemical": {
+      "active": "Mancozeb (as locally approved)",
+      "warning": "Apply preventively in humid seasons",
+      "ppe": "Gloves, mask",
+      "phi": "Follow label, typically 7 days"
+    }
+  },
+  "leafminer": {
+    "name": "Leaf Miner",
+    "type": "Pest",
+    "tags": [
+      "holes in leaves",
+      "yellow leaves"
+    ],
+    "cause": "Larvae that tunnel between leaf layers leaving pale winding trails",
+    "prevention": [
+      "Yellow sticky traps",
+      "Remove and destroy affected leaves early"
+    ],
+    "organic": [
+      "Neem oil spray"
+    ],
+    "mechanical": [
+      "Hand-pick and destroy mined leaves"
+    ],
+    "chemical": {
+      "active": "Spinosad (as locally approved)",
+      "warning": "Only if infestation is severe",
+      "ppe": "Gloves, mask",
+      "phi": "Follow label"
+    }
+  },
+  "rootrot": {
+    "name": "Root Rot",
+    "type": "Disease",
+    "tags": [
+      "wilting",
+      "mold or fungus"
+    ],
+    "cause": "Fungal disease in poorly drained, waterlogged soil",
+    "prevention": [
+      "Improve drainage, raised beds in heavy soil",
+      "Avoid overwatering"
+    ],
+    "organic": [
+      "Trichoderma soil application at planting"
+    ],
+    "mechanical": [
+      "Remove and destroy affected plants"
+    ],
+    "chemical": {
+      "active": "Carbendazim soil drench (as locally approved)",
+      "warning": "Prevention is more effective than cure",
+      "ppe": "Gloves, mask",
+      "phi": "Follow label"
+    }
+  },
+  "shootborer": {
+    "name": "Shoot & Fruit Borer",
+    "type": "Pest",
+    "tags": [
+      "holes in leaves",
+      "wilting",
+      "insects visible"
+    ],
+    "cause": "Moth larvae boring into shoots and fruit",
+    "prevention": [
+      "Pheromone traps for monitoring",
+      "Remove and destroy wilted shoot tips"
+    ],
+    "organic": [
+      "Bt spray",
+      "Neem seed kernel extract"
+    ],
+    "mechanical": [
+      "Prune and destroy infested shoots weekly"
+    ],
+    "chemical": {
+      "active": "Emamectin benzoate (as locally approved)",
+      "warning": "Rotate chemical classes to manage resistance",
+      "ppe": "Gloves, mask, eye protection",
+      "phi": "Follow label, typically 3–5 days"
+    }
+  },
+  "anthracnose": {
+    "name": "Anthracnose (Fruit Rot)",
+    "type": "Disease",
+    "tags": [
+      "brown spots",
+      "mold or fungus"
+    ],
+    "cause": "Fungal disease favoured by warm, humid, wet conditions",
+    "prevention": [
+      "Avoid overhead watering",
+      "Ensure good airflow between plants"
+    ],
+    "organic": [
+      "Copper-based fungicide, preventive"
+    ],
+    "mechanical": [
+      "Remove and destroy infected fruit"
+    ],
+    "chemical": {
+      "active": "Mancozeb (as locally approved)",
+      "warning": "Apply before heavy rain periods",
+      "ppe": "Gloves, mask",
+      "phi": "Follow label, typically 7 days"
+    }
+  },
+  "whitefly": {
+    "name": "Whitefly",
+    "type": "Pest",
+    "tags": [
+      "insects visible",
+      "yellow leaves",
+      "mold or fungus"
+    ],
+    "cause": "Tiny white flying insects that suck sap and spread viruses; secrete honeydew leading to sooty mould",
+    "prevention": [
+      "Yellow sticky traps",
+      "Avoid excess nitrogen"
+    ],
+    "organic": [
+      "Neem oil spray every 5–7 days"
+    ],
+    "mechanical": [
+      "Vacuum or hose off light infestations"
+    ],
+    "chemical": {
+      "active": "Imidacloprid (as locally approved)",
+      "warning": "Whitefly develops resistance quickly — rotate products",
+      "ppe": "Gloves, mask",
+      "phi": "Follow label"
+    }
+  },
+  "powderymildew": {
+    "name": "Powdery Mildew",
+    "type": "Disease",
+    "tags": [
+      "mold or fungus",
+      "yellow leaves"
+    ],
+    "cause": "Fungal disease favoured by humid days and dry nights, poor air circulation",
+    "prevention": [
+      "Improve spacing and airflow",
+      "Avoid overhead watering in evening"
+    ],
+    "organic": [
+      "Spray diluted milk or sulfur-based fungicide"
+    ],
+    "mechanical": [
+      "Remove and destroy heavily infected leaves"
+    ],
+    "chemical": {
+      "active": "Sulfur or Hexaconazole (as locally approved)",
+      "warning": "Do not apply sulfur in very hot weather — can scorch leaves",
+      "ppe": "Gloves, mask",
+      "phi": "Follow label"
+    }
+  },
+  "jassid": {
+    "name": "Jassids (Leafhoppers)",
+    "type": "Pest",
+    "tags": [
+      "yellow leaves",
+      "insects visible"
+    ],
+    "cause": "Small hopping insects that suck sap, causing leaf curling and yellowing",
+    "prevention": [
+      "Yellow sticky traps",
+      "Avoid water stress"
+    ],
+    "organic": [
+      "Neem oil spray"
+    ],
+    "mechanical": [
+      "—"
+    ],
+    "chemical": {
+      "active": "Imidacloprid (as locally approved)",
+      "warning": "Rotate chemical classes",
+      "ppe": "Gloves, mask",
+      "phi": "Follow label"
+    }
+  },
+  "yellowmosaic": {
+    "name": "Yellow Mosaic Virus",
+    "type": "Disease",
+    "tags": [
+      "yellow leaves"
+    ],
+    "cause": "Virus spread by whitefly, causing yellow mosaic patterning on leaves",
+    "prevention": [
+      "Control whitefly populations early",
+      "Use resistant/tolerant varieties where available",
+      "Remove infected plants promptly"
+    ],
+    "organic": [
+      "Neem oil to reduce whitefly vector"
+    ],
+    "mechanical": [
+      "Rogue out infected plants early in the season"
+    ],
+    "chemical": {
+      "active": "No direct cure — manage the whitefly vector",
+      "warning": "Focus on prevention and vector control",
+      "ppe": "—",
+      "phi": "—"
+    }
+  },
+  "stemborer": {
+    "name": "Stem Borer",
+    "type": "Pest",
+    "tags": [
+      "wilting",
+      "holes in leaves",
+      "insects visible"
+    ],
+    "cause": "Moth larvae boring into stems causing \"dead heart\" in young plants",
+    "prevention": [
+      "Use pheromone traps",
+      "Avoid staggered planting near infested fields"
+    ],
+    "organic": [
+      "Release Trichogramma egg parasitoids",
+      "Bt spray at early larval stage"
+    ],
+    "mechanical": [
+      "Remove and destroy dead-heart tillers"
+    ],
+    "chemical": {
+      "active": "Cartap hydrochloride (as locally approved)",
+      "warning": "Apply at early larval stage for best effect",
+      "ppe": "Gloves, mask",
+      "phi": "Follow label"
+    }
+  },
+  "blast": {
+    "name": "Rice Blast",
+    "type": "Disease",
+    "tags": [
+      "brown spots",
+      "mold or fungus"
+    ],
+    "cause": "Fungal disease favoured by high humidity and excess nitrogen",
+    "prevention": [
+      "Avoid excess nitrogen application",
+      "Use resistant varieties",
+      "Maintain field drainage"
+    ],
+    "organic": [
+      "Preventive neem-based spray"
+    ],
+    "mechanical": [
+      "Remove infected plant debris after harvest"
+    ],
+    "chemical": {
+      "active": "Tricyclazole (as locally approved)",
+      "warning": "Apply preventively at first sign of lesions",
+      "ppe": "Gloves, mask",
+      "phi": "Follow label"
+    }
+  },
+  "bph": {
+    "name": "Brown Plant Hopper",
+    "type": "Pest",
+    "tags": [
+      "wilting",
+      "insects visible"
+    ],
+    "cause": "Sap-sucking insect causing \"hopper burn\" (patches of drying, brown plants)",
+    "prevention": [
+      "Avoid excess nitrogen",
+      "Maintain alternate wetting-drying rather than constant flooding where feasible"
+    ],
+    "organic": [
+      "Encourage spiders and natural predators, minimize broad-spectrum sprays"
+    ],
+    "mechanical": [
+      "Drain field briefly to disrupt hopper breeding"
+    ],
+    "chemical": {
+      "active": "Buprofezin (as locally approved)",
+      "warning": "Avoid broad-spectrum insecticides that kill natural predators",
+      "ppe": "Gloves, mask",
+      "phi": "Follow label"
+    }
+  },
+  "fallarmyworm": {
+    "name": "Fall Armyworm",
+    "type": "Pest",
+    "tags": [
+      "holes in leaves",
+      "insects visible"
+    ],
+    "cause": "Caterpillar feeding inside the whorl of young maize plants",
+    "prevention": [
+      "Monitor whorls regularly from early growth stage",
+      "Intercropping can reduce spread"
+    ],
+    "organic": [
+      "Apply Bt-based spray into the whorl",
+      "Neem seed kernel extract"
+    ],
+    "mechanical": [
+      "Hand-pick larvae from whorls in small plots"
+    ],
+    "chemical": {
+      "active": "Emamectin benzoate (as locally approved)",
+      "warning": "Apply directly into the whorl for best effect",
+      "ppe": "Gloves, mask",
+      "phi": "Follow label"
+    }
+  },
+  "rust": {
+    "name": "Wheat Rust",
+    "type": "Disease",
+    "tags": [
+      "brown spots",
+      "yellow leaves"
+    ],
+    "cause": "Fungal disease spreading via wind-blown spores in humid, mild weather",
+    "prevention": [
+      "Use rust-resistant varieties",
+      "Avoid excess nitrogen",
+      "Timely sowing to avoid peak spore periods"
+    ],
+    "organic": [
+      "Limited organic options — prevention is key"
+    ],
+    "mechanical": [
+      "Remove volunteer wheat plants that harbor spores"
+    ],
+    "chemical": {
+      "active": "Propiconazole (as locally approved)",
+      "warning": "Apply at first sign for best control",
+      "ppe": "Gloves, mask",
+      "phi": "Follow label"
+    }
+  },
+  "shootfly": {
+    "name": "Shoot Fly",
+    "type": "Pest",
+    "tags": [
+      "wilting"
+    ],
+    "cause": "Fly larvae boring into young seedling stems causing \"dead heart\"",
+    "prevention": [
+      "Timely sowing at start of season reduces risk",
+      "Higher seed rate to compensate for losses"
+    ],
+    "organic": [
+      "Neem seed kernel extract spray at seedling stage"
+    ],
+    "mechanical": [
+      "Remove and destroy dead-heart plants"
+    ],
+    "chemical": {
+      "active": "Seed treatment with Thiamethoxam (as locally approved)",
+      "warning": "Apply as seed treatment before sowing",
+      "ppe": "Gloves, mask",
+      "phi": "Follow label"
+    }
+  },
+  "downymildew": {
+    "name": "Downy Mildew",
+    "type": "Disease",
+    "tags": [
+      "mold or fungus",
+      "yellow leaves"
+    ],
+    "cause": "Fungus-like pathogen favoured by high humidity and leaf wetness",
+    "prevention": [
+      "Use resistant varieties",
+      "Avoid overcrowded planting"
+    ],
+    "organic": [
+      "Preventive copper-based spray"
+    ],
+    "mechanical": [
+      "Remove and destroy infected plants early"
+    ],
+    "chemical": {
+      "active": "Metalaxyl (as locally approved)",
+      "warning": "Apply preventively before humid spells",
+      "ppe": "Gloves, mask",
+      "phi": "Follow label"
+    }
+  },
+  "podborer": {
+    "name": "Pod Borer",
+    "type": "Pest",
+    "tags": [
+      "holes in leaves",
+      "insects visible"
+    ],
+    "cause": "Moth larvae feeding on flowers and boring into developing pods",
+    "prevention": [
+      "Pheromone traps for monitoring",
+      "Intercrop with sorghum as a trap border"
+    ],
+    "organic": [
+      "Bt spray at flowering",
+      "Neem seed kernel extract"
+    ],
+    "mechanical": [
+      "Hand-pick larvae in small plots"
+    ],
+    "chemical": {
+      "active": "Emamectin benzoate (as locally approved)",
+      "warning": "Apply at early flowering for best effect",
+      "ppe": "Gloves, mask",
+      "phi": "Follow label"
+    }
+  },
+  "leafspot": {
+    "name": "Leaf Spot",
+    "type": "Disease",
+    "tags": [
+      "brown spots",
+      "mold or fungus"
+    ],
+    "cause": "Fungal disease favoured by humid weather and leaf wetness",
+    "prevention": [
+      "Crop rotation",
+      "Remove infected debris after harvest"
+    ],
+    "organic": [
+      "Preventive copper-based spray"
+    ],
+    "mechanical": [
+      "Remove severely affected leaves"
+    ],
+    "chemical": {
+      "active": "Chlorothalonil (as locally approved)",
+      "warning": "Apply preventively",
+      "ppe": "Gloves, mask",
+      "phi": "Follow label"
+    }
+  },
+  "sigatoka": {
+    "name": "Sigatoka Leaf Spot",
+    "type": "Disease",
+    "tags": [
+      "brown spots",
+      "mold or fungus",
+      "yellow leaves"
+    ],
+    "cause": "Fungal disease of banana leaves, worse in humid, high-rainfall conditions",
+    "prevention": [
+      "Remove and destroy infected leaves regularly",
+      "Ensure good spacing for airflow"
+    ],
+    "organic": [
+      "Preventive copper-based spray"
+    ],
+    "mechanical": [
+      "Deleaf infected leaves regularly"
+    ],
+    "chemical": {
+      "active": "Propiconazole (as locally approved)",
+      "warning": "Rotate fungicide classes to avoid resistance",
+      "ppe": "Gloves, mask",
+      "phi": "Follow label"
+    }
+  },
+  "nematode": {
+    "name": "Root-knot Nematode",
+    "type": "Pest",
+    "tags": [
+      "wilting",
+      "yellow leaves"
+    ],
+    "cause": "Microscopic soil worms causing root galls and reduced nutrient uptake",
+    "prevention": [
+      "Crop rotation with non-host crops",
+      "Use nematode-free planting material"
+    ],
+    "organic": [
+      "Add neem cake to soil",
+      "Marigold intercropping suppresses nematodes"
+    ],
+    "mechanical": [
+      "Soil solarization before planting"
+    ],
+    "chemical": {
+      "active": "Carbofuran soil application (as locally approved)",
+      "warning": "Restricted in many regions — check local regulations",
+      "ppe": "Gloves, mask",
+      "phi": "Follow label strictly"
+    }
+  },
+  "fruitfly": {
+    "name": "Fruit Fly",
+    "type": "Pest",
+    "tags": [
+      "insects visible",
+      "holes in leaves"
+    ],
+    "cause": "Flies lay eggs in ripening fruit; maggots develop inside causing rot",
+    "prevention": [
+      "Use fruit fly traps with methyl eugenol lure",
+      "Collect and destroy fallen fruit promptly"
+    ],
+    "organic": [
+      "Neem oil spray",
+      "Bait traps with jaggery + insecticide in a container (not sprayed on fruit)"
+    ],
+    "mechanical": [
+      "Bag individual fruit with paper/net bags"
+    ],
+    "chemical": {
+      "active": "Spinosad bait application (as locally approved)",
+      "warning": "Use bait stations rather than blanket spraying",
+      "ppe": "Gloves, mask",
+      "phi": "Follow label"
+    }
+  },
+  "hopper": {
+    "name": "Mango Hopper",
+    "type": "Pest",
+    "tags": [
+      "insects visible",
+      "wilting"
+    ],
+    "cause": "Sap-sucking insect active during flowering, causing flower and fruit drop",
+    "prevention": [
+      "Avoid dense canopy — prune for airflow",
+      "Monitor during flowering season"
+    ],
+    "organic": [
+      "Neem oil spray during flowering"
+    ],
+    "mechanical": [
+      "—"
+    ],
+    "chemical": {
+      "active": "Imidacloprid (as locally approved)",
+      "warning": "Avoid spraying during open flowering to protect pollinators",
+      "ppe": "Gloves, mask",
+      "phi": "Follow label"
+    }
+  },
+  "ringspot": {
+    "name": "Papaya Ringspot Virus",
+    "type": "Disease",
+    "tags": [
+      "yellow leaves",
+      "mold or fungus"
+    ],
+    "cause": "Virus spread by aphids, causing ring-shaped spots on fruit and leaf distortion",
+    "prevention": [
+      "Control aphid vectors",
+      "Rogue out infected plants promptly",
+      "Use tolerant varieties where available"
+    ],
+    "organic": [
+      "Neem oil to reduce aphid vector"
+    ],
+    "mechanical": [
+      "Remove and destroy infected plants immediately"
+    ],
+    "chemical": {
+      "active": "No direct cure — manage the aphid vector",
+      "warning": "Focus on prevention and vector control",
+      "ppe": "—",
+      "phi": "—"
+    }
+  },
+  "mite": {
+    "name": "Spider Mite",
+    "type": "Pest",
+    "tags": [
+      "yellow leaves",
+      "insects visible"
+    ],
+    "cause": "Tiny mites that feed on leaf undersides, thriving in hot, dry conditions",
+    "prevention": [
+      "Maintain adequate irrigation to reduce plant stress",
+      "Avoid excess dust on foliage"
+    ],
+    "organic": [
+      "Neem oil spray",
+      "Spray undersides of leaves with water to disrupt mites"
+    ],
+    "mechanical": [
+      "Remove heavily infested leaves"
+    ],
+    "chemical": {
+      "active": "Abamectin (as locally approved)",
+      "warning": "Rotate miticide classes to avoid resistance",
+      "ppe": "Gloves, mask, eye protection",
+      "phi": "Follow label"
+    }
+  }
+}

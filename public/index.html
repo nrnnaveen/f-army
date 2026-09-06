@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>FARMY — Smart Farming Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --forest:#1E3B2C; --forest-dark:#12261B; --leaf:#4C7A3F; --leaf-light:#EAF2E6;
+  --sun:#E3A63A; --sun-dark:#B9832A; --soil:#7A5232; --soil-light:#F1E6D8;
+  --paper:#FBF9F3; --card:#FFFFFF; --ink:#1B231C; --ink-soft:#5B655C;
+  --line:rgba(27,35,28,0.12); --danger:#B4443B; --danger-bg:#FBEBE9;
+  --radius-s:10px; --radius-m:16px; --radius-pill:999px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:'Work Sans',-apple-system,sans-serif;-webkit-font-smoothing:antialiased;}
+#appwrap{max-width:480px;margin:0 auto;min-height:100vh;background:var(--paper);display:flex;flex-direction:column;position:relative;padding-bottom:78px;}
+h1,h2,h3{font-family:'Fraunces',Georgia,serif;margin:0;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+input,select{font-family:inherit;}
+
+.screen{padding:20px 18px 28px;flex:1;}
+.content{padding-top:6px;}
+.hint{color:var(--ink-soft);font-size:14px;margin:6px 0 14px;line-height:1.5;}
+
+/* Login */
+.login-screen{background:linear-gradient(180deg,var(--forest) 0%, var(--forest) 38%, var(--paper) 38%);min-height:100vh;padding:0;}
+.login-hero{padding:56px 24px 30px;text-align:center;color:#fff;}
+.login-hero.small{padding-top:56px;}
+.brandmark{font-size:44px;line-height:1;}
+.brand{font-size:38px;color:#fff;letter-spacing:0.5px;margin-top:8px;}
+.brand.small{font-size:26px;}
+.tagline{color:#DCE9DA;margin-top:6px;font-size:15px;}
+.login-card{background:var(--card);margin:0 18px;border-radius:var(--radius-m);padding:26px 22px 30px;box-shadow:0 12px 30px rgba(18,38,27,0.12);}
+.segmented{display:flex;background:var(--leaf-light);border-radius:var(--radius-pill);padding:4px;margin-bottom:18px;}
+.seg{flex:1;padding:10px 0;border-radius:var(--radius-pill);font-weight:600;font-size:14px;color:var(--forest);}
+.seg.active{background:var(--forest);color:#fff;}
+.fieldlabel{display:block;font-size:13px;font-weight:600;color:var(--ink-soft);margin:14px 0 6px;}
+.textfield{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:var(--radius-s);font-size:16px;background:#fff;color:var(--ink);}
+.textfield:focus{outline:none;border-color:var(--leaf);}
+.otp-input{letter-spacing:10px;font-size:24px;text-align:center;font-weight:700;}
+.btn-primary{background:var(--forest);color:#fff;padding:15px;border-radius:var(--radius-pill);font-weight:700;font-size:16px;width:100%;margin-top:20px;}
+.btn-primary.big{margin-top:22px;}
+.btn-primary:active{background:var(--forest-dark);}
+.btn-secondary{background:var(--leaf-light);color:var(--forest);padding:14px;border-radius:var(--radius-pill);font-weight:700;font-size:15px;width:100%;margin-top:12px;text-align:center;}
+.btn-text{display:block;text-align:center;margin-top:14px;color:var(--forest);font-weight:600;font-size:14px;}
+.finetext{text-align:center;color:var(--ink-soft);font-size:12.5px;margin-top:16px;line-height:1.5;}
+.demo-otp-note{background:var(--sun-dark);background:#FDF1DC;border:1px solid var(--sun);color:#6B4A12;padding:12px 14px;border-radius:var(--radius-s);font-size:13.5px;line-height:1.5;margin-bottom:8px;}
+.demo-otp-note.live{background:#DDF0D8;border-color:#3E9B2C;color:#276B1E;}
+.banner{min-height:0;font-size:13px;color:var(--danger);font-weight:600;margin-top:4px;overflow:hidden;max-height:0;transition:max-height .2s;}
+.banner.show{max-height:40px;padding-top:4px;}
+
+/* Top bar */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.topbar h1{font-size:21px;}
+.iconbtn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:18px;border-radius:var(--radius-pill);}
+.iconbtn.spacer{visibility:hidden;}
+
+/* Home */
+.home-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+.greeting{color:var(--ink-soft);font-size:14px;margin:0;}
+.farmer-name{font-size:24px;margin-top:2px;}
+.avatar{width:44px;height:44px;border-radius:50%;background:var(--sun);color:#4A3208;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;}
+.searchbar{display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid var(--line);padding:13px 16px;border-radius:var(--radius-pill);color:var(--ink-soft);margin-bottom:14px;width:100%;text-align:left;}
+.cta-banner{width:100%;display:flex;align-items:center;justify-content:space-between;background:var(--forest);color:#fff;padding:18px 20px;border-radius:var(--radius-m);margin-bottom:16px;}
+.cta-title{font-weight:700;font-size:16px;}
+.cta-sub{font-size:12.5px;color:#CFE0CB;margin-top:3px;}
+.cta-arrow{font-size:20px;}
+.statuspill{display:inline-block;font-size:12px;font-weight:700;padding:6px 12px;border-radius:var(--radius-pill);margin-bottom:14px;}
+.statuspill.on{background:#DDF0D8;color:#276B1E;}
+.statuspill.off{background:#FDF1DC;color:#8A5F10;}
+.alertbox{background:#FDF1DC;border-radius:var(--radius-m);padding:12px 14px;margin-bottom:20px;}
+.alertrow{font-size:13px;line-height:1.6;color:#6B4A12;font-weight:600;}
+.alertrow:not(:last-child){margin-bottom:4px;}
+.weather-card{display:flex;align-items:center;gap:14px;background:var(--soil-light);border-radius:var(--radius-m);padding:16px 18px;margin-bottom:20px;}
+.wtemp{font-family:'Fraunces',serif;font-size:34px;color:var(--soil);}
+.wdetails{flex:1;font-size:14px;font-weight:600;}
+.wsub{color:var(--ink-soft);font-weight:400;font-size:12.5px;margin-top:2px;}
+.wmore{font-size:12.5px;color:var(--soil);font-weight:700;}
+.section-title{font-size:17px;margin:20px 0 10px;}
+.hscroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;margin:0 -18px;padding-left:18px;padding-right:18px;}
+.cropchip{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:6px;background:#fff;border:1.5px solid var(--line);border-radius:var(--radius-m);padding:12px 16px;min-width:76px;font-size:12.5px;font-weight:600;}
+.chipemoji{font-size:26px;}
+.quickgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;}
+.quickcard{background:#fff;border:1.5px solid var(--line);border-radius:var(--radius-m);padding:16px;display:flex;flex-direction:column;gap:6px;font-weight:700;font-size:14px;}
+.quickcard span{font-size:22px;}
+
+/* Lists / cards */
+.listrow{width:100%;display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid var(--line);border-radius:var(--radius-m);padding:12px 14px;margin-top:10px;text-align:left;}
+.listrow-name{font-weight:700;font-size:15px;}
+.listrow-sub{color:var(--ink-soft);font-size:12.5px;margin-top:2px;}
+.chev{margin-left:auto;color:var(--ink-soft);font-size:20px;}
+.croplistitems{margin-top:4px;}
+
+/* Recommendation results */
+.reslist{display:flex;flex-direction:column;gap:12px;margin-top:14px;}
+.rescard{width:100%;background:#fff;border:1.5px solid var(--line);border-radius:var(--radius-m);padding:16px;text-align:left;}
+.rescard-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.rescard-name{font-weight:700;font-size:15.5px;flex:1;}
+.rescard-sci{font-weight:400;font-size:12px;color:var(--ink-soft);font-style:italic;}
+.badge{font-size:11px;font-weight:800;padding:5px 10px;border-radius:var(--radius-pill);white-space:nowrap;}
+.badge.great{background:#DDF0D8;color:#276B1E;}
+.badge.good{background:#E7F1E1;color:#3E6B32;}
+.badge.ok{background:#FCEED2;color:#8A5F10;}
+.badge.bad{background:var(--danger-bg);color:var(--danger);}
+.badge.warn2{background:#FCEED2;color:#8A5F10;}
+.scorebar{height:7px;border-radius:4px;background:#EEEBE1;overflow:hidden;}
+.scorebar-fill{height:100%;border-radius:4px;}
+.scorebar-fill.great{background:#3E9B2C;}
+.scorebar-fill.good{background:#6DB151;}
+.scorebar-fill.ok{background:var(--sun);}
+.scorebar-fill.bad{background:var(--danger);}
+.score-num{font-size:12px;color:var(--ink-soft);margin-top:4px;font-weight:600;}
+.reasonlist{list-style:none;padding:0;margin:10px 0 0;font-size:13.5px;line-height:1.6;}
+.reasonlist li.ok{color:#2E6B22;}
+.reasonlist li.no{color:var(--danger);}
+
+/* Crop detail */
+.crophero{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+.crophero-emoji{font-size:44px;}
+.crophero-name{font-family:'Fraunces',serif;font-size:22px;}
+.crophero-sci{color:var(--ink-soft);font-size:13px;font-style:italic;}
+.tabbar{display:flex;gap:6px;overflow-x:auto;border-bottom:1.5px solid var(--line);margin-bottom:16px;}
+.tab{flex:0 0 auto;padding:10px 4px;font-weight:700;font-size:13.5px;color:var(--ink-soft);border-bottom:2.5px solid transparent;margin-right:14px;}
+.tab.active{color:var(--forest);border-color:var(--forest);}
+.infogrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.infobox{background:#fff;border:1.5px solid var(--line);border-radius:var(--radius-s);padding:12px;}
+.infolabel{font-size:11.5px;color:var(--ink-soft);font-weight:700;text-transform:none;}
+.infoval{font-size:14.5px;font-weight:700;margin-top:3px;}
+.subhead{font-size:16px;margin:18px 0 10px;}
+.steplist{padding-left:20px;font-size:14px;line-height:1.8;}
+.notebox{background:var(--leaf-light);border-radius:var(--radius-s);padding:12px 14px;font-size:13.5px;line-height:1.55;margin-top:10px;}
+.notebox.warn{background:#FDF1DC;color:#6B4A12;}
+.minitool{margin-top:16px;}
+.timeline{display:flex;flex-direction:column;gap:0;}
+.tlstep{display:flex;gap:12px;}
+.tldot{width:26px;height:26px;border-radius:50%;background:var(--forest);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 auto;position:relative;}
+.tlstep:not(:last-child) .tldot::after{content:'';position:absolute;top:26px;left:50%;transform:translateX(-50%);width:2px;height:calc(100% + 6px);background:var(--line);}
+.tlbody{padding-bottom:22px;flex:1;}
+.tlname{font-weight:700;font-size:14.5px;}
+.tldays{color:var(--ink-soft);font-weight:600;font-size:12px;margin-left:6px;}
+.tlrow{font-size:13px;line-height:1.6;margin-top:4px;color:var(--ink-soft);}
+.tlrow.warn{color:var(--danger);}
+.tlrow b{color:var(--ink);}
+
+/* Pest */
+.chipgrid{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 18px;}
+.symptomchip{background:#fff;border:1.5px solid var(--line);border-radius:var(--radius-pill);padding:9px 14px;font-size:13px;font-weight:600;}
+.symptomchip.active{background:var(--forest);color:#fff;border-color:var(--forest);}
+.pestcard{background:#fff;border:1.5px solid var(--line);border-radius:var(--radius-m);padding:14px 16px;}
+.pestcard-top{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.pestname{font-weight:700;font-size:15px;}
+.pest-cause{font-size:13.5px;color:var(--ink-soft);line-height:1.5;margin:0 0 6px;}
+.pestcard details{font-size:13px;line-height:1.6;}
+.pestcard summary{font-weight:700;color:var(--forest);cursor:pointer;margin-bottom:6px;}
+.pestcard ul{padding-left:18px;margin:4px 0 10px;}
+
+/* Soil / weather results */
+.scorecircle-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin:10px 0 6px;}
+.scorecircle{width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:28px;font-weight:700;color:#fff;background:var(--sun);}
+.scorecircle.great{background:#3E9B2C;}
+.scorecircle.good{background:#6DB151;}
+.scorecircle.ok{background:var(--sun);}
+.scorecircle.bad{background:var(--danger);}
+.scorecirc-label{font-weight:700;font-size:14px;text-align:center;}
+.weather-big{text-align:center;margin:10px 0 16px;}
+.wtemp-big{font-family:'Fraunces',serif;font-size:46px;color:var(--soil);}
+.forecastrow{display:flex;justify-content:space-between;background:#fff;border:1.5px solid var(--line);border-radius:var(--radius-m);padding:14px 8px;margin-bottom:18px;}
+.forecastday{text-align:center;font-size:12px;font-weight:600;flex:1;}
+.fc-t{font-weight:800;margin-top:4px;}
+.fc-r{color:var(--ink-soft);margin-top:2px;font-size:11px;}
+
+/* Farm */
+.emptystate{text-align:center;padding:50px 10px;}
+.emptystate-emoji{font-size:44px;}
+.emptystate h3{margin-top:10px;font-size:18px;}
+.emptystate p{color:var(--ink-soft);font-size:13.5px;margin:8px 0 20px;}
+.farmcard{background:#fff;border:1.5px solid var(--line);border-radius:var(--radius-m);padding:16px;}
+.farmcard-top{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+
+/* Yield/profit results */
+.resultbox{background:#fff;border:1.5px solid var(--line);border-radius:var(--radius-m);padding:18px;margin-top:16px;}
+.resultbox-title{font-size:13px;color:var(--ink-soft);font-weight:700;}
+.resultbox-big{font-family:'Fraunces',serif;font-size:26px;color:var(--forest);margin-top:4px;}
+.pl-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;}
+.pl-row.total{border-bottom:none;font-size:16px;padding-top:12px;}
+.pl-row.total.pos b{color:#2E6B22;}
+.pl-row.total.neg b{color:var(--danger);}
+
+/* Assistant */
+.assistant-body{display:flex;flex-direction:column;height:calc(100vh - 150px);}
+.chatlog{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-bottom:12px;}
+.chatmsg{max-width:82%;padding:11px 14px;border-radius:16px;font-size:14px;line-height:1.5;}
+.chatmsg.assistant{background:var(--leaf-light);color:var(--ink);align-self:flex-start;border-bottom-left-radius:4px;}
+.chatmsg.user{background:var(--forest);color:#fff;align-self:flex-end;border-bottom-right-radius:4px;}
+.chatmsg.typing{color:var(--ink-soft);font-style:italic;}
+.chatinputrow{display:flex;gap:8px;padding-top:10px;border-top:1.5px solid var(--line);}
+.chatinput{flex:1;margin:0;}
+.sendbtn{width:auto;padding:0 20px;margin:0;}
+
+/* Bottom nav */
+#bottomNav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1.5px solid var(--line);display:none;justify-content:space-around;padding:8px 4px 10px;z-index:20;}
+.navitem{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:700;color:var(--ink-soft);padding:4px 8px;border-radius:10px;}
+.navitem span.navicon{font-size:19px;}
+.navitem.active{color:var(--forest);}
+
+@media(min-width:481px){
+  #appwrap{border-left:1px solid var(--line);border-right:1px solid var(--line);}
+}
+
+</style>
+</head>
+<body>
+<div id="appwrap">
+  <div id="app"></div>
+  <nav id="bottomNav">
+    <button class="navitem" data-screen="home"><span class="navicon">🏠</span>Home</button>
+    <button class="navitem" data-screen="recommend"><span class="navicon">🌱</span>Recommend</button>
+    <button class="navitem" data-screen="myfarm"><span class="navicon">🚜</span>My Farm</button>
+    <button class="navitem" data-screen="tools"><span class="navicon">🧪</span>Tools</button>
+    <button class="navitem" data-screen="assistant"><span class="navicon">💬</span>Assistant</button>
+  </nav>
+</div>
+<script>
+// FARMY crop & pest database (approximate agronomic reference data for India-focused smallholder farming)
+const CROPS = [
+  {
+    id:'tomato', name:'Tomato', sci:'Solanum lycopersicum', category:'Vegetable', emoji:'🍅',
+    seasons:['Kharif','Rabi'], months:'June–July or Oct–Nov', temp:[18,27], ph:[6.0,6.8],
+    soils:['Loamy','Sandy loam'], humidity:[50,70], rainfall:'Moderate, 600–1000mm/yr, avoid waterlogging',
+    sunlight:'Full sun, 6–8 hrs/day', water:'Medium', irrigation:'Every 4–6 days; drip preferred',
+    waterCritical:'Flowering and fruit development — irregular watering causes blossom-end rot and fruit cracking',
+    npk:{n:120,p:60,k:60}, fertNote:'Split nitrogen into 3 doses; add well-rotted FYM 10 t/acre at land prep',
+    duration:120,
+    planting:['Prepare well-drained raised beds','Add 10 t/acre farmyard manure while ploughing','Raise seedlings in nursery for 25–30 days before transplanting','Treat seeds with Trichoderma to prevent damping-off','Transplant healthy seedlings in evening hours','Planting depth: 1–2 cm for seed, transplant to first true-leaf node','Spacing: 60cm x 45cm','Best planted at start of Kharif or Rabi season'],
+    stages:[
+      {name:'Germination',days:'0–7',care:'Keep nursery soil moist, shaded',water:'Light daily sprinkling',fert:'None',warn:'Avoid waterlogging, causes damping-off'},
+      {name:'Seedling',days:'7–25',care:'Harden seedlings before transplant',water:'Moderate, every 2 days',fert:'Starter dose of DAP at transplant',warn:'Protect from strong sun for first week'},
+      {name:'Vegetative',days:'25–45',care:'Stake plants, remove suckers',water:'Every 4–6 days',fert:'1st nitrogen top-dress',warn:'Watch for aphids and leaf curl virus'},
+      {name:'Flowering',days:'45–65',care:'Ensure pollination, avoid stress',water:'Consistent, critical stage',fert:'2nd nitrogen + potash dose',warn:'Water stress now causes flower drop'},
+      {name:'Fruiting',days:'65–95',care:'Support heavy branches',water:'Consistent, avoid sudden changes',fert:'Final potash-heavy dose',warn:'Irregular watering causes blossom-end rot & cracking'},
+      {name:'Harvesting',days:'95–120',care:'Pick at breaker/red stage depending on market',water:'Reduce gradually',fert:'Stop fertilizing',warn:'Handle fruit gently to avoid bruising'}
+    ],
+    pests:['aphid','earlyblight','fruitborer','wilt'],
+    yieldPerAcre:[8000,14000], costPerAcre:28000, priceEstimate:12
+  },
+  {
+    id:'potato', name:'Potato', sci:'Solanum tuberosum', category:'Vegetable', emoji:'🥔',
+    seasons:['Rabi'], months:'Oct–Nov', temp:[15,24], ph:[5.5,6.5],
+    soils:['Sandy loam','Loamy'], humidity:[60,80], rainfall:'Low to moderate, sensitive to waterlogging',
+    sunlight:'Full sun, 6+ hrs/day', water:'Medium', irrigation:'Every 7–10 days',
+    waterCritical:'Tuber initiation and bulking stage',
+    npk:{n:100,p:50,k:100}, fertNote:'Potash-heavy; apply full P & K at planting, split N',
+    duration:100,
+    planting:['Plough field 2–3 times to fine tilth','Use certified disease-free tubers','Cut and treat seed tubers with fungicide if large','Plant tubers 5–7cm deep','Spacing: 60cm rows x 20cm plants','Earth-up soil around stems at 30 and 45 days'],
+    stages:[
+      {name:'Sprouting',days:'0–15',care:'Keep soil moist, not waterlogged',water:'Light, frequent',fert:'Full P & K basal dose',warn:'Rotting in waterlogged soil'},
+      {name:'Vegetative',days:'15–35',care:'First earthing-up',water:'Every 7 days',fert:'1st N top-dress',warn:'Watch for aphid-spread viruses'},
+      {name:'Tuber initiation',days:'35–55',care:'Second earthing-up',water:'Critical — do not let soil dry',fert:'2nd N top-dress',warn:'Water stress reduces tuber number'},
+      {name:'Bulking',days:'55–80',care:'Maintain even moisture',water:'Consistent, critical stage',fert:'None additional',warn:'Late blight risk in humid weather'},
+      {name:'Maturity/Harvest',days:'80–100',care:'Stop irrigation 10 days before harvest',water:'Withhold near end',fert:'None',warn:'Cure tubers in shade before storage'}
+    ],
+    pests:['lateblight','aphid','cutworm'],
+    yieldPerAcre:[8000,12000], costPerAcre:26000, priceEstimate:10
+  },
+  {
+    id:'onion', name:'Onion', sci:'Allium cepa', category:'Vegetable', emoji:'🧅',
+    seasons:['Rabi','Kharif'], months:'Oct–Dec or May–June', temp:[13,28], ph:[6.0,7.0],
+    soils:['Loamy','Sandy loam'], humidity:[50,70], rainfall:'Low, sensitive to excess moisture near harvest',
+    sunlight:'Full sun', water:'Medium', irrigation:'Every 7–10 days',
+    waterCritical:'Bulb development stage',
+    npk:{n:100,p:50,k:50}, fertNote:'Avoid excess N near maturity — delays bulbing',
+    duration:130,
+    planting:['Raise seedlings in nursery 6 weeks','Prepare fine, well-drained beds','Transplant seedlings 10–12cm deep','Spacing: 15cm x 10cm','Best in cool, dry season'],
+    stages:[
+      {name:'Nursery',days:'0–35',care:'Keep nursery bed moist and weed-free',water:'Light daily',fert:'Small starter dose',warn:'Damping-off in overwatered nursery'},
+      {name:'Vegetative',days:'35–70',care:'Weed regularly, thin plants',water:'Every 7 days',fert:'1st N dose',warn:'Thrips can damage young leaves'},
+      {name:'Bulb initiation',days:'70–95',care:'Maintain even moisture',water:'Critical stage',fert:'K-heavy dose',warn:'Long days trigger bulbing — check variety/season match'},
+      {name:'Bulb development',days:'95–120',care:'Reduce nitrogen',water:'Steady, reduce gradually',fert:'None',warn:'Excess water causes bulb rot'},
+      {name:'Maturity/Harvest',days:'120–130',care:'Harvest when tops fall over and dry',water:'Stop 2 weeks before harvest',fert:'None',warn:'Cure bulbs in shade for storage'}
+    ],
+    pests:['thrips','purpleblotch'],
+    yieldPerAcre:[7000,10000], costPerAcre:24000, priceEstimate:14
+  },
+  {
+    id:'carrot', name:'Carrot', sci:'Daucus carota', category:'Vegetable', emoji:'🥕',
+    seasons:['Rabi'], months:'Sep–Oct', temp:[16,24], ph:[6.0,6.8],
+    soils:['Sandy loam','Loamy'], humidity:[50,70], rainfall:'Moderate, well-drained essential',
+    sunlight:'Full sun', water:'Medium', irrigation:'Every 6–8 days',
+    waterCritical:'Root development stage',
+    npk:{n:60,p:60,k:80}, fertNote:'Avoid fresh manure — causes forked roots',
+    duration:100,
+    planting:['Deep-plough sandy loam soil, remove stones','Sow seeds directly, 1cm deep','Spacing: 30cm rows, thin to 5–8cm between plants','Avoid recently manured land'],
+    stages:[
+      {name:'Germination',days:'0–14',care:'Keep top soil moist',water:'Light, frequent',fert:'None',warn:'Slow, uneven germination is normal'},
+      {name:'Seedling',days:'14–35',care:'Thin overcrowded seedlings',water:'Every 5–6 days',fert:'Starter P dose',warn:'Weed competition stunts roots'},
+      {name:'Root development',days:'35–75',care:'Keep soil loose around roots',water:'Consistent, critical stage',fert:'K-heavy dose',warn:'Irregular watering causes split roots'},
+      {name:'Maturity/Harvest',days:'75–100',care:'Check root size before full harvest',water:'Reduce before harvest',fert:'None',warn:'Delayed harvest causes woody texture'}
+    ],
+    pests:['leafminer','rootrot'],
+    yieldPerAcre:[6000,9000], costPerAcre:20000, priceEstimate:15
+  },
+  {
+    id:'brinjal', name:'Brinjal (Eggplant)', sci:'Solanum melongena', category:'Vegetable', emoji:'🍆',
+    seasons:['Kharif','Rabi'], months:'June–July or Oct–Nov', temp:[21,30], ph:[5.5,6.8],
+    soils:['Loamy','Sandy loam','Clay loam'], humidity:[55,75], rainfall:'Moderate',
+    sunlight:'Full sun', water:'Medium', irrigation:'Every 5–7 days',
+    waterCritical:'Flowering and fruiting',
+    npk:{n:100,p:50,k:50}, fertNote:'Apply FYM 10 t/acre at planting, split N in 3 doses',
+    duration:130,
+    planting:['Raise nursery 4–5 weeks','Prepare beds with FYM','Transplant in evening','Spacing: 75cm x 60cm','Stake tall varieties'],
+    stages:[
+      {name:'Nursery/Seedling',days:'0–30',care:'Shade nursery, harden before transplant',water:'Light daily',fert:'Starter dose',warn:'Damping-off if overwatered'},
+      {name:'Vegetative',days:'30–55',care:'Stake and prune weak shoots',water:'Every 5–7 days',fert:'1st N dose',warn:'Watch for shoot borer damage'},
+      {name:'Flowering',days:'55–80',care:'Support branches',water:'Consistent, critical',fert:'2nd N + K dose',warn:'Fruit and shoot borer intensifies now'},
+      {name:'Fruiting/Harvest',days:'80–130',care:'Pick fruit young and glossy, continuous harvest',water:'Steady',fert:'Light maintenance dose',warn:'Overripe fruit turns bitter and seedy'}
+    ],
+    pests:['shootborer','aphid','wilt'],
+    yieldPerAcre:[9000,13000], costPerAcre:25000, priceEstimate:11
+  },
+  {
+    id:'chilli', name:'Chilli', sci:'Capsicum annuum', category:'Vegetable', emoji:'🌶️',
+    seasons:['Kharif','Rabi'], months:'June–July or Nov–Dec', temp:[20,30], ph:[6.0,7.0],
+    soils:['Loamy','Sandy loam'], humidity:[50,70], rainfall:'Moderate, sensitive to waterlogging',
+    sunlight:'Full sun', water:'Medium', irrigation:'Every 6–8 days',
+    waterCritical:'Flowering to fruit-set',
+    npk:{n:90,p:50,k:50}, fertNote:'Split N in 3 doses; avoid excess N which delays flowering',
+    duration:150,
+    planting:['Raise nursery 30–35 days','Treat seeds with Trichoderma','Transplant into raised beds','Spacing: 60cm x 45cm','Mulch to retain moisture'],
+    stages:[
+      {name:'Nursery',days:'0–35',care:'Shade and water lightly',water:'Light daily',fert:'None',warn:'Damping-off risk'},
+      {name:'Vegetative',days:'35–60',care:'Weed and stake if needed',water:'Every 6–8 days',fert:'1st N dose',warn:'Aphid and thrips buildup'},
+      {name:'Flowering',days:'60–90',care:'Avoid water stress',water:'Critical stage',fert:'2nd N + K dose',warn:'Flower drop from heat or stress'},
+      {name:'Fruiting/Harvest',days:'90–150',care:'Pick continuously as pods mature',water:'Steady',fert:'Maintenance dose',warn:'Anthracnose (fruit rot) risk in humid weather'}
+    ],
+    pests:['thrips','anthracnose','aphid'],
+    yieldPerAcre:[2500,4500], costPerAcre:27000, priceEstimate:60
+  },
+  {
+    id:'cucumber', name:'Cucumber', sci:'Cucumis sativus', category:'Vegetable', emoji:'🥒',
+    seasons:['Zaid','Kharif'], months:'Feb–Mar or June–July', temp:[20,30], ph:[6.0,6.8],
+    soils:['Sandy loam','Loamy'], humidity:[60,80], rainfall:'Moderate',
+    sunlight:'Full sun', water:'Medium-High', irrigation:'Every 3–5 days',
+    waterCritical:'Flowering and fruit development',
+    npk:{n:60,p:40,k:40}, fertNote:'Apply FYM at planting, split N in 2 doses',
+    duration:65,
+    planting:['Prepare raised beds or ridges','Sow 2–3 seeds per hill, 2cm deep','Thin to 1 healthy plant per hill','Spacing: 1m x 0.5m','Provide trellis for climbing varieties'],
+    stages:[
+      {name:'Germination',days:'0–7',care:'Keep soil warm and moist',water:'Light daily',fert:'None',warn:'Cold soil delays germination'},
+      {name:'Vegetative',days:'7–25',care:'Train vines onto trellis',water:'Every 3–5 days',fert:'1st N dose',warn:'Watch for whitefly'},
+      {name:'Flowering',days:'25–40',care:'Ensure pollinator activity',water:'Critical stage',fert:'2nd dose N+K',warn:'Poor pollination causes misshapen fruit'},
+      {name:'Fruiting/Harvest',days:'40–65',care:'Harvest young and tender, frequently',water:'Steady, do not let dry',fert:'None',warn:'Powdery mildew in humid, still air'}
+    ],
+    pests:['whitefly','powderymildew'],
+    yieldPerAcre:[8000,12000], costPerAcre:18000, priceEstimate:9
+  },
+  {
+    id:'okra', name:'Okra (Ladyfinger)', sci:'Abelmoschus esculentus', category:'Vegetable', emoji:'🫛',
+    seasons:['Kharif','Zaid'], months:'June–July or Feb–Mar', temp:[22,32], ph:[6.0,6.8],
+    soils:['Loamy','Sandy loam'], humidity:[55,75], rainfall:'Moderate',
+    sunlight:'Full sun', water:'Medium', irrigation:'Every 5–7 days',
+    waterCritical:'Flowering and pod formation',
+    npk:{n:80,p:40,k:40}, fertNote:'Split N in 2 doses',
+    duration:60,
+    planting:['Direct sow, 2cm deep','Spacing: 45cm x 30cm','Thin weak seedlings','Avoid waterlogged fields'],
+    stages:[
+      {name:'Germination',days:'0–7',care:'Keep soil moist',water:'Light daily',fert:'None',warn:'Poor germination in cold soil'},
+      {name:'Vegetative',days:'7–30',care:'Weed regularly',water:'Every 5–7 days',fert:'1st N dose',warn:'Jassids and aphids on young leaves'},
+      {name:'Flowering/Pod',days:'30–60',care:'Harvest pods every 2–3 days while tender',water:'Consistent',fert:'2nd N dose',warn:'Overmature pods turn fibrous quickly'}
+    ],
+    pests:['jassid','fruitborer','yellowmosaic'],
+    yieldPerAcre:[6000,9000], costPerAcre:16000, priceEstimate:16
+  },
+  {
+    id:'rice', name:'Rice (Paddy)', sci:'Oryza sativa', category:'Grain', emoji:'🌾',
+    seasons:['Kharif'], months:'June–July', temp:[20,35], ph:[5.5,6.5],
+    soils:['Clay','Clay loam'], humidity:[70,90], rainfall:'High, 1000–2000mm, needs standing water',
+    sunlight:'Full sun', water:'High', irrigation:'Maintain 2–5cm standing water through most stages',
+    waterCritical:'Tillering to flowering — never let field dry',
+    npk:{n:100,p:50,k:50}, fertNote:'Apply N in 3 splits: basal, tillering, panicle initiation',
+    duration:130,
+    planting:['Raise seedlings in wet nursery 25–30 days','Puddle main field thoroughly','Transplant 2–3 seedlings per hill','Spacing: 20cm x 15cm','Maintain shallow standing water after transplant'],
+    stages:[
+      {name:'Nursery/Transplant',days:'0–25',care:'Maintain shallow water in nursery',water:'Standing water',fert:'Basal dose',warn:'Seedling shock if transplanted too old'},
+      {name:'Tillering',days:'25–55',care:'Weed, maintain water level',water:'2–5cm standing water',fert:'1st top-dress',warn:'Drying now sharply cuts tiller number'},
+      {name:'Panicle initiation',days:'55–80',care:'Do not let field dry',water:'Critical stage',fert:'2nd top-dress',warn:'Stem borer risk increases'},
+      {name:'Flowering',days:'80–100',care:'Maintain water, avoid stress',water:'Critical stage',fert:'None',warn:'Heat/water stress reduces grain fill'},
+      {name:'Maturity/Harvest',days:'100–130',care:'Drain field 10 days before harvest',water:'Drain gradually',fert:'None',warn:'Harvest at golden-yellow stage to avoid shattering'}
+    ],
+    pests:['stemborer','blast','bph'],
+    yieldPerAcre:[2000,2800], costPerAcre:22000, priceEstimate:20
+  },
+  {
+    id:'maize', name:'Maize (Corn)', sci:'Zea mays', category:'Grain', emoji:'🌽',
+    seasons:['Kharif','Rabi'], months:'June–July or Oct–Nov', temp:[18,32], ph:[5.8,7.0],
+    soils:['Loamy','Sandy loam'], humidity:[50,75], rainfall:'Moderate, 500–800mm',
+    sunlight:'Full sun', water:'Medium', irrigation:'Every 7–10 days',
+    waterCritical:'Tasseling and silking (flowering)',
+    npk:{n:120,p:60,k:40}, fertNote:'Split N in 3 doses: basal, knee-high, tasseling',
+    duration:100,
+    planting:['Deep plough and level field','Sow seeds 4–5cm deep','Spacing: 60cm x 20cm','Avoid waterlogged soil'],
+    stages:[
+      {name:'Germination',days:'0–10',care:'Keep soil moist, not wet',water:'Light',fert:'Basal dose',warn:'Poor drainage causes seed rot'},
+      {name:'Vegetative',days:'10–45',care:'Weed control, earthing-up',water:'Every 7–10 days',fert:'Knee-high N dose',warn:'Fall armyworm risk in whorls'},
+      {name:'Tasseling/Silking',days:'45–65',care:'Ensure no water stress',water:'Critical stage',fert:'Final N dose',warn:'Water stress now sharply cuts yield'},
+      {name:'Grain fill',days:'65–90',care:'Monitor for stem borer',water:'Steady, reduce gradually',fert:'None',warn:'Bird damage near maturity'},
+      {name:'Maturity/Harvest',days:'90–100',care:'Harvest when husks dry and brown',water:'Stop before harvest',fert:'None',warn:'Delayed harvest invites grain mold'}
+    ],
+    pests:['fallarmyworm','stemborer'],
+    yieldPerAcre:[2200,3200], costPerAcre:18000, priceEstimate:18
+  },
+  {
+    id:'wheat', name:'Wheat', sci:'Triticum aestivum', category:'Grain', emoji:'🌾',
+    seasons:['Rabi'], months:'Nov–Dec', temp:[10,25], ph:[6.0,7.5],
+    soils:['Loamy','Clay loam'], humidity:[40,60], rainfall:'Low, needs irrigation',
+    sunlight:'Full sun', water:'Medium', irrigation:'4–6 irrigations across season',
+    waterCritical:'Crown root initiation (~21 days) and flowering',
+    npk:{n:100,p:50,k:40}, fertNote:'Split N: basal, crown root stage, flowering',
+    duration:120,
+    planting:['Fine tilth seedbed','Sow seeds 4–5cm deep in rows','Spacing: 20cm rows','Sow within first 2 weeks of Rabi window for best yield'],
+    stages:[
+      {name:'Germination',days:'0–10',care:'Light irrigation after sowing',water:'Light',fert:'Basal dose',warn:'Delayed sowing lowers yield'},
+      {name:'Crown root/Tillering',days:'10–40',care:'First irrigation critical',water:'Critical stage',fert:'1st N top-dress',warn:'Weed competition reduces tillers'},
+      {name:'Jointing/Booting',days:'40–75',care:'Maintain steady moisture',water:'Every 15–20 days',fert:'2nd N dose',warn:'Rust disease risk in humid spells'},
+      {name:'Flowering/Grain fill',days:'75–105',care:'Avoid water stress',water:'Critical stage',fert:'None',warn:'Heat stress during grain fill cuts weight'},
+      {name:'Maturity/Harvest',days:'105–120',care:'Harvest when grain is hard and golden',water:'Stop before harvest',fert:'None',warn:'Delayed harvest causes shattering losses'}
+    ],
+    pests:['aphid','rust'],
+    yieldPerAcre:[1600,2200], costPerAcre:16000, priceEstimate:22
+  },
+  {
+    id:'millet', name:'Millet (Bajra)', sci:'Pennisetum glaucum', category:'Grain', emoji:'🌾',
+    seasons:['Kharif'], months:'June–July', temp:[25,35], ph:[5.5,7.5],
+    soils:['Sandy','Sandy loam'], humidity:[30,60], rainfall:'Low, drought-tolerant, 350–500mm',
+    sunlight:'Full sun', water:'Low', irrigation:'Mostly rainfed; irrigate only in prolonged dry spells',
+    waterCritical:'Flowering stage, if irrigation available',
+    npk:{n:40,p:20,k:20}, fertNote:'Low input crop; basal + one top-dress sufficient',
+    duration:90,
+    planting:['Suited to light sandy soils and low rainfall areas','Sow seeds 2–3cm deep','Spacing: 45cm x 15cm','Thin excess seedlings after 2 weeks'],
+    stages:[
+      {name:'Germination',days:'0–8',care:'Minimal care, rainfed',water:'Rain-dependent',fert:'Basal dose',warn:'Bird damage on seedlings'},
+      {name:'Vegetative',days:'8–40',care:'Light weeding',water:'Rain-dependent',fert:'1st N top-dress',warn:'Shoot fly in dry spells'},
+      {name:'Flowering',days:'40–65',care:'Irrigate if possible during dry spell',water:'Critical if rain absent',fert:'None',warn:'Downy mildew in wet, humid conditions'},
+      {name:'Maturity/Harvest',days:'65–90',care:'Harvest when grain hardens',water:'Minimal',fert:'None',warn:'Bird damage near maturity'}
+    ],
+    pests:['shootfly','downymildew'],
+    yieldPerAcre:[600,1000], costPerAcre:9000, priceEstimate:24
+  },
+  {
+    id:'chickpea', name:'Chickpea (Chana)', sci:'Cicer arietinum', category:'Pulse', emoji:'🫘',
+    seasons:['Rabi'], months:'Oct–Nov', temp:[15,25], ph:[6.0,7.5],
+    soils:['Loamy','Sandy loam'], humidity:[30,50], rainfall:'Low, drought-tolerant',
+    sunlight:'Full sun', water:'Low', irrigation:'1–2 irrigations only, at branching & pod filling',
+    waterCritical:'Pod filling stage',
+    npk:{n:20,p:50,k:20}, fertNote:'Low nitrogen — legume fixes its own; focus on phosphorus',
+    duration:100,
+    planting:['Sow in residual moisture after monsoon','Seed treatment with Rhizobium culture recommended','Sow 5–8cm deep','Spacing: 30cm x 10cm'],
+    stages:[
+      {name:'Germination',days:'0–10',care:'Sow in adequate residual soil moisture',water:'Minimal',fert:'Basal P dose',warn:'Waterlogging kills seedlings'},
+      {name:'Vegetative',days:'10–45',care:'One light weeding',water:'Rain/residual moisture',fert:'None additional',warn:'Watch for pod borer moths'},
+      {name:'Flowering/Pod filling',days:'45–80',care:'Irrigate lightly if very dry',water:'Critical if no rain',fert:'None',warn:'Pod borer is the major yield-loss risk'},
+      {name:'Maturity/Harvest',days:'80–100',care:'Harvest when pods dry and rattle',water:'None',fert:'None',warn:'Delayed harvest causes shattering'}
+    ],
+    pests:['podborer','wilt'],
+    yieldPerAcre:[400,700], costPerAcre:8000, priceEstimate:55
+  },
+  {
+    id:'groundnut', name:'Groundnut (Peanut)', sci:'Arachis hypogaea', category:'Pulse', emoji:'🥜',
+    seasons:['Kharif'], months:'June–July', temp:[22,30], ph:[6.0,6.5],
+    soils:['Sandy loam','Sandy'], humidity:[50,70], rainfall:'Moderate, 500–750mm',
+    sunlight:'Full sun', water:'Medium', irrigation:'Every 10–15 days if not rainfed',
+    waterCritical:'Flowering and peg penetration (pod formation)',
+    npk:{n:20,p:40,k:40}, fertNote:'Gypsum application at flowering improves pod filling',
+    duration:110,
+    planting:['Loosen soil deeply for easy pegging','Sow pods 5cm deep','Spacing: 30cm x 10cm','Ensure good drainage'],
+    stages:[
+      {name:'Germination',days:'0–10',care:'Keep soil loose and moist',water:'Light',fert:'Basal dose',warn:'Crusted soil blocks emergence'},
+      {name:'Vegetative',days:'10–35',care:'Weed before flowering begins',water:'Every 10–15 days',fert:'None additional',warn:'Leaf spot disease in humid weather'},
+      {name:'Flowering/Pegging',days:'35–65',care:'Light earthing-up to help peg entry',water:'Critical stage',fert:'Gypsum at flowering',warn:'Dry soil blocks peg penetration, cuts pod count'},
+      {name:'Pod filling/Harvest',days:'65–110',care:'Reduce water near maturity',water:'Steady, then reduce',fert:'None',warn:'Harvest promptly to avoid aflatoxin risk in wet soil'}
+    ],
+    pests:['leafspot','aphid'],
+    yieldPerAcre:[1000,1600], costPerAcre:15000, priceEstimate:52
+  },
+  {
+    id:'greengram', name:'Green Gram (Moong)', sci:'Vigna radiata', category:'Pulse', emoji:'🫛',
+    seasons:['Kharif','Zaid'], months:'June–July or Mar–Apr', temp:[25,35], ph:[6.2,7.2],
+    soils:['Loamy','Sandy loam'], humidity:[50,70], rainfall:'Moderate',
+    sunlight:'Full sun', water:'Low-Medium', irrigation:'Every 10–12 days if no rain',
+    waterCritical:'Flowering and pod formation',
+    npk:{n:20,p:40,k:20}, fertNote:'Short-duration legume; low nitrogen need',
+    duration:65,
+    planting:['Sow directly after light ploughing','Rhizobium seed treatment recommended','Sow 3–4cm deep','Spacing: 30cm x 10cm'],
+    stages:[
+      {name:'Germination',days:'0–7',care:'Keep soil moist',water:'Light',fert:'Basal dose',warn:'Waterlogging causes seed rot'},
+      {name:'Vegetative',days:'7–30',care:'One weeding at 20 days',water:'Every 10–12 days',fert:'None',warn:'Whitefly can spread yellow mosaic virus'},
+      {name:'Flowering/Pod',days:'30–55',care:'Avoid water stress',water:'Critical stage',fert:'None',warn:'Yellow mosaic virus reduces pod set'},
+      {name:'Maturity/Harvest',days:'55–65',care:'Harvest in 2–3 pickings as pods mature',water:'None',fert:'None',warn:'Pods shatter if left too long'}
+    ],
+    pests:['whitefly','yellowmosaic'],
+    yieldPerAcre:[300,500], costPerAcre:7000, priceEstimate:65
+  },
+  {
+    id:'banana', name:'Banana', sci:'Musa spp.', category:'Fruit', emoji:'🍌',
+    seasons:['Year-round (best: Jun or Feb)'], months:'June–July or Feb–Mar', temp:[20,32], ph:[6.0,7.5],
+    soils:['Loamy','Clay loam'], humidity:[70,90], rainfall:'High, needs consistent moisture, no waterlogging',
+    sunlight:'Full sun, wind protection helpful', water:'High', irrigation:'Every 4–7 days, drip preferred',
+    waterCritical:'Shooting (bunch emergence) to fruit filling',
+    npk:{n:200,p:60,k:300}, fertNote:'Very potassium-hungry; apply in monthly split doses',
+    duration:330,
+    planting:['Use disease-free tissue-culture suckers','Dig pits 60x60x60cm, fill with FYM + topsoil','Spacing: 1.8m x 1.8m','Plant at start of main growing season'],
+    stages:[
+      {name:'Establishment',days:'0–60',care:'Mulch to retain moisture',water:'Every 4–7 days',fert:'Basal FYM + starter dose',warn:'Waterlogging causes rhizome rot'},
+      {name:'Vegetative',days:'60–180',care:'Remove excess suckers, keep 1 follower',water:'Every 4–7 days',fert:'Monthly split N-K doses',warn:'Nutrient deficiency shows as yellow leaf margins'},
+      {name:'Shooting/Flowering',days:'180–250',care:'Support plant against wind',water:'Critical stage',fert:'K-heavy dose',warn:'Water stress now reduces bunch size'},
+      {name:'Fruit filling',days:'250–300',care:'Cover bunch to protect from sun/pests',water:'Consistent',fert:'Final K dose',warn:'Fruit cracking from irregular watering'},
+      {name:'Harvest',days:'300–330',care:'Harvest when fingers are plump and rounded',water:'Reduce',fert:'None',warn:'Handle bunches carefully to avoid bruising'}
+    ],
+    pests:['aphid','sigatoka','nematode'],
+    yieldPerAcre:[18000,25000], costPerAcre:60000, priceEstimate:14
+  },
+  {
+    id:'mango', name:'Mango', sci:'Mangifera indica', category:'Fruit', emoji:'🥭',
+    seasons:['Perennial — plant at monsoon start'], months:'June–July (planting)', temp:[24,35], ph:[5.5,7.5],
+    soils:['Loamy','Sandy loam'], humidity:[40,60], rainfall:'Moderate, dry spell needed before flowering',
+    sunlight:'Full sun', water:'Medium', irrigation:'Every 10–15 days for young trees; mature trees mostly rain-fed',
+    waterCritical:'Fruit development stage; avoid irrigation just before flowering',
+    npk:{n:500,p:250,k:500,note:'grams per mature tree per year'}, fertNote:'Apply in 2 split doses per year, after harvest and before flowering',
+    duration:1460,
+    planting:['Dig large pits 1m x 1m, fill with FYM + topsoil','Use grafted saplings for earlier, reliable fruiting','Spacing: 8–10m between trees','Plant at start of monsoon for establishment'],
+    stages:[
+      {name:'Establishment (Yr 1)',days:'0–365',care:'Regular watering, staking',water:'Every 7–10 days',fert:'Light starter dose',warn:'Young trees vulnerable to waterlogging'},
+      {name:'Juvenile growth (Yr 2–3)',days:'365–1095',care:'Formative pruning',water:'Every 10–15 days',fert:'Annual split dose',warn:'Avoid heavy fertilizing which delays flowering'},
+      {name:'Flowering',days:'~1200 (season)',care:'Withhold irrigation before flowering to induce it',water:'Reduce sharply pre-flowering',fert:'Post-harvest dose only',warn:'Rain/humidity during flowering causes fruit drop and mildew'},
+      {name:'Fruit development',days:'+60–90 after flowering',care:'Support heavy branches',water:'Critical stage',fert:'None',warn:'Fruit fly damage during ripening'},
+      {name:'Harvest',days:'variable by variety',care:'Harvest at mature-green stage for transport',water:'Reduce',fert:'Post-harvest dose',warn:'Handle to avoid latex staining and bruising'}
+    ],
+    pests:['fruitfly','powderymildew','hopper'],
+    yieldPerAcre:[4000,8000], costPerAcre:35000, priceEstimate:40
+  },
+  {
+    id:'papaya', name:'Papaya', sci:'Carica papaya', category:'Fruit', emoji:'🍈',
+    seasons:['Year-round (best: Feb–Mar or Jun–Jul)'], months:'Feb–Mar or June–July', temp:[22,32], ph:[6.0,7.0],
+    soils:['Loamy','Sandy loam'], humidity:[60,80], rainfall:'Moderate, cannot tolerate waterlogging',
+    sunlight:'Full sun', water:'Medium', irrigation:'Every 5–7 days',
+    waterCritical:'Flowering and fruit development',
+    npk:{n:250,p:250,k:500,note:'grams per plant per year'}, fertNote:'Apply in monthly split doses starting 1 month after planting',
+    duration:270,
+    planting:['Dig pits 45x45x45cm with FYM','Use disease-free nursery seedlings','Spacing: 2m x 2m','Ensure excellent drainage — most sensitive to waterlogging'],
+    stages:[
+      {name:'Establishment',days:'0–45',care:'Shade young plants briefly after transplant',water:'Every 5–7 days',fert:'Starter dose',warn:'Root rot in waterlogged soil'},
+      {name:'Vegetative',days:'45–150',care:'Remove excess male plants once sex is visible',water:'Every 5–7 days',fert:'Monthly split doses',warn:'Mite and aphid buildup on undersides of leaves'},
+      {name:'Flowering',days:'150–180',care:'Monitor pollination',water:'Consistent',fert:'K-heavy dose',warn:'Ringspot virus (spread by aphids) is the major risk'},
+      {name:'Fruit development/Harvest',days:'180–270',care:'Harvest at colour-break stage for transport',water:'Steady',fert:'Maintenance dose',warn:'Handle fruit gently, high latex content stains'}
+    ],
+    pests:['aphid','ringspot','mite'],
+    yieldPerAcre:[25000,40000], costPerAcre:45000, priceEstimate:12
+  }
+];
+
+const PESTS = {
+  aphid:{name:'Aphids',type:'Pest',tags:['insects visible','yellow leaves','mold or fungus'],cause:'Small sap-sucking insects that cluster on new growth and undersides of leaves; thrive in warm, dry weather',prevention:['Encourage natural predators (ladybirds, lacewings)','Avoid excess nitrogen which encourages soft new growth','Use yellow sticky traps to monitor early'],organic:['Spray neem oil solution every 7 days','Introduce ladybird beetles','Strong water spray to dislodge colonies'],mechanical:['Remove and destroy heavily infested shoots'],chemical:{active:'Imidacloprid (as locally approved)',warning:'Only use if organic controls fail and infestation is severe',ppe:'Gloves, mask, long sleeves',phi:'Follow label pre-harvest interval, typically 7–14 days'}},
+  earlyblight:{name:'Early Blight',type:'Disease',tags:['brown spots','yellow leaves'],cause:'Fungal disease (Alternaria) favoured by warm, humid conditions and leaf wetness',prevention:['Rotate crops, avoid planting tomato/potato repeatedly in same field','Ensure good spacing for airflow','Remove infected plant debris'],organic:['Spray copper-based fungicide preventively','Neem oil as a preventive spray'],mechanical:['Prune lower infected leaves and destroy them'],chemical:{active:'Mancozeb (as locally approved)',warning:'Apply preventively, not after heavy infection',ppe:'Gloves, mask',phi:'Follow label, typically 5–7 days'}},
+  fruitborer:{name:'Fruit Borer',type:'Pest',tags:['holes in leaves','insects visible'],cause:'Moth larvae that bore into fruit and shoots',prevention:['Use pheromone traps to monitor and trap adult moths','Remove and destroy damaged fruit promptly','Intercrop with marigold as a trap crop'],organic:['Spray Bacillus thuringiensis (Bt)','Neem seed kernel extract spray'],mechanical:['Hand-pick and destroy infested fruit/shoots'],chemical:{active:'Emamectin benzoate (as locally approved)',warning:'Rotate chemical classes to avoid resistance',ppe:'Gloves, mask, eye protection',phi:'Follow label, typically 3–5 days'}},
+  wilt:{name:'Bacterial/Fusarium Wilt',type:'Disease',tags:['wilting'],cause:'Soil-borne bacteria or fungus blocking water transport in the plant',prevention:['Practice crop rotation with non-host crops','Use resistant varieties where available','Improve field drainage'],organic:['Soil solarization before planting','Apply Trichoderma-enriched compost'],mechanical:['Remove and destroy wilted plants immediately, do not compost'],chemical:{active:'No reliable curative chemical control',warning:'Focus on prevention and resistant varieties',ppe:'—',phi:'—'}},
+  lateblight:{name:'Late Blight',type:'Disease',tags:['brown spots','mold or fungus','wilting'],cause:'Fungus-like pathogen (Phytophthora) spreading fast in cool, wet, humid weather',prevention:['Use certified disease-free seed tubers','Avoid overhead irrigation in cool weather','Ensure good field drainage'],organic:['Preventive copper-based fungicide spray'],mechanical:['Destroy infected foliage immediately'],chemical:{active:'Metalaxyl + Mancozeb (as locally approved)',warning:'Apply before rain in high-risk weather, resistance can develop',ppe:'Gloves, mask',phi:'Follow label, typically 7 days'}},
+  cutworm:{name:'Cutworm',type:'Pest',tags:['holes in leaves','wilting'],cause:'Caterpillars that cut young stems at soil level, active at night',prevention:['Deep ploughing before planting exposes larvae to predators/sun','Remove weeds which host larvae'],organic:['Neem cake application to soil','Hand-collect larvae at dusk'],mechanical:['Place collars around stems of young transplants'],chemical:{active:'Chlorpyrifos soil application (as locally approved)',warning:'Use only as last resort, harmful to soil organisms',ppe:'Gloves, mask',phi:'Follow label strictly'}},
+  thrips:{name:'Thrips',type:'Pest',tags:['insects visible','yellow leaves'],cause:'Tiny slender insects that scrape and suck plant tissue, thrive in hot dry weather',prevention:['Blue sticky traps for monitoring','Avoid water stress which increases susceptibility'],organic:['Neem oil spray every 5–7 days'],mechanical:['Remove weeds around field that host thrips'],chemical:{active:'Spinosad (as locally approved)',warning:'Rotate with different chemical classes',ppe:'Gloves, mask',phi:'Follow label, typically 3–5 days'}},
+  purpleblotch:{name:'Purple Blotch',type:'Disease',tags:['brown spots','mold or fungus'],cause:'Fungal disease favoured by humid weather and dense planting',prevention:['Avoid overcrowded planting for airflow','Rotate crops'],organic:['Copper-based fungicide, preventive spray'],mechanical:['Remove and destroy infected leaves'],chemical:{active:'Mancozeb (as locally approved)',warning:'Apply preventively in humid seasons',ppe:'Gloves, mask',phi:'Follow label, typically 7 days'}},
+  leafminer:{name:'Leaf Miner',type:'Pest',tags:['holes in leaves','yellow leaves'],cause:'Larvae that tunnel between leaf layers leaving pale winding trails',prevention:['Yellow sticky traps','Remove and destroy affected leaves early'],organic:['Neem oil spray'],mechanical:['Hand-pick and destroy mined leaves'],chemical:{active:'Spinosad (as locally approved)',warning:'Only if infestation is severe',ppe:'Gloves, mask',phi:'Follow label'}},
+  rootrot:{name:'Root Rot',type:'Disease',tags:['wilting','mold or fungus'],cause:'Fungal disease in poorly drained, waterlogged soil',prevention:['Improve drainage, raised beds in heavy soil','Avoid overwatering'],organic:['Trichoderma soil application at planting'],mechanical:['Remove and destroy affected plants'],chemical:{active:'Carbendazim soil drench (as locally approved)',warning:'Prevention is more effective than cure',ppe:'Gloves, mask',phi:'Follow label'}},
+  shootborer:{name:'Shoot & Fruit Borer',type:'Pest',tags:['holes in leaves','wilting','insects visible'],cause:'Moth larvae boring into shoots and fruit',prevention:['Pheromone traps for monitoring','Remove and destroy wilted shoot tips'],organic:['Bt spray','Neem seed kernel extract'],mechanical:['Prune and destroy infested shoots weekly'],chemical:{active:'Emamectin benzoate (as locally approved)',warning:'Rotate chemical classes to manage resistance',ppe:'Gloves, mask, eye protection',phi:'Follow label, typically 3–5 days'}},
+  anthracnose:{name:'Anthracnose (Fruit Rot)',type:'Disease',tags:['brown spots','mold or fungus'],cause:'Fungal disease favoured by warm, humid, wet conditions',prevention:['Avoid overhead watering','Ensure good airflow between plants'],organic:['Copper-based fungicide, preventive'],mechanical:['Remove and destroy infected fruit'],chemical:{active:'Mancozeb (as locally approved)',warning:'Apply before heavy rain periods',ppe:'Gloves, mask',phi:'Follow label, typically 7 days'}},
+  whitefly:{name:'Whitefly',type:'Pest',tags:['insects visible','yellow leaves','mold or fungus'],cause:'Tiny white flying insects that suck sap and spread viruses; secrete honeydew leading to sooty mould',prevention:['Yellow sticky traps','Avoid excess nitrogen'],organic:['Neem oil spray every 5–7 days'],mechanical:['Vacuum or hose off light infestations'],chemical:{active:'Imidacloprid (as locally approved)',warning:'Whitefly develops resistance quickly — rotate products',ppe:'Gloves, mask',phi:'Follow label'}},
+  powderymildew:{name:'Powdery Mildew',type:'Disease',tags:['mold or fungus','yellow leaves'],cause:'Fungal disease favoured by humid days and dry nights, poor air circulation',prevention:['Improve spacing and airflow','Avoid overhead watering in evening'],organic:['Spray diluted milk or sulfur-based fungicide'],mechanical:['Remove and destroy heavily infected leaves'],chemical:{active:'Sulfur or Hexaconazole (as locally approved)',warning:'Do not apply sulfur in very hot weather — can scorch leaves',ppe:'Gloves, mask',phi:'Follow label'}},
+  jassid:{name:'Jassids (Leafhoppers)',type:'Pest',tags:['yellow leaves','insects visible'],cause:'Small hopping insects that suck sap, causing leaf curling and yellowing',prevention:['Yellow sticky traps','Avoid water stress'],organic:['Neem oil spray'],mechanical:['—'],chemical:{active:'Imidacloprid (as locally approved)',warning:'Rotate chemical classes',ppe:'Gloves, mask',phi:'Follow label'}},
+  yellowmosaic:{name:'Yellow Mosaic Virus',type:'Disease',tags:['yellow leaves'],cause:'Virus spread by whitefly, causing yellow mosaic patterning on leaves',prevention:['Control whitefly populations early','Use resistant/tolerant varieties where available','Remove infected plants promptly'],organic:['Neem oil to reduce whitefly vector'],mechanical:['Rogue out infected plants early in the season'],chemical:{active:'No direct cure — manage the whitefly vector',warning:'Focus on prevention and vector control',ppe:'—',phi:'—'}},
+  stemborer:{name:'Stem Borer',type:'Pest',tags:['wilting','holes in leaves','insects visible'],cause:'Moth larvae boring into stems causing "dead heart" in young plants',prevention:['Use pheromone traps','Avoid staggered planting near infested fields'],organic:['Release Trichogramma egg parasitoids','Bt spray at early larval stage'],mechanical:['Remove and destroy dead-heart tillers'],chemical:{active:'Cartap hydrochloride (as locally approved)',warning:'Apply at early larval stage for best effect',ppe:'Gloves, mask',phi:'Follow label'}},
+  blast:{name:'Rice Blast',type:'Disease',tags:['brown spots','mold or fungus'],cause:'Fungal disease favoured by high humidity and excess nitrogen',prevention:['Avoid excess nitrogen application','Use resistant varieties','Maintain field drainage'],organic:['Preventive neem-based spray'],mechanical:['Remove infected plant debris after harvest'],chemical:{active:'Tricyclazole (as locally approved)',warning:'Apply preventively at first sign of lesions',ppe:'Gloves, mask',phi:'Follow label'}},
+  bph:{name:'Brown Plant Hopper',type:'Pest',tags:['wilting','insects visible'],cause:'Sap-sucking insect causing "hopper burn" (patches of drying, brown plants)',prevention:['Avoid excess nitrogen','Maintain alternate wetting-drying rather than constant flooding where feasible'],organic:['Encourage spiders and natural predators, minimize broad-spectrum sprays'],mechanical:['Drain field briefly to disrupt hopper breeding'],chemical:{active:'Buprofezin (as locally approved)',warning:'Avoid broad-spectrum insecticides that kill natural predators',ppe:'Gloves, mask',phi:'Follow label'}},
+  fallarmyworm:{name:'Fall Armyworm',type:'Pest',tags:['holes in leaves','insects visible'],cause:'Caterpillar feeding inside the whorl of young maize plants',prevention:['Monitor whorls regularly from early growth stage','Intercropping can reduce spread'],organic:['Apply Bt-based spray into the whorl','Neem seed kernel extract'],mechanical:['Hand-pick larvae from whorls in small plots'],chemical:{active:'Emamectin benzoate (as locally approved)',warning:'Apply directly into the whorl for best effect',ppe:'Gloves, mask',phi:'Follow label'}},
+  rust:{name:'Wheat Rust',type:'Disease',tags:['brown spots','yellow leaves'],cause:'Fungal disease spreading via wind-blown spores in humid, mild weather',prevention:['Use rust-resistant varieties','Avoid excess nitrogen','Timely sowing to avoid peak spore periods'],organic:['Limited organic options — prevention is key'],mechanical:['Remove volunteer wheat plants that harbor spores'],chemical:{active:'Propiconazole (as locally approved)',warning:'Apply at first sign for best control',ppe:'Gloves, mask',phi:'Follow label'}},
+  shootfly:{name:'Shoot Fly',type:'Pest',tags:['wilting'],cause:'Fly larvae boring into young seedling stems causing "dead heart"',prevention:['Timely sowing at start of season reduces risk','Higher seed rate to compensate for losses'],organic:['Neem seed kernel extract spray at seedling stage'],mechanical:['Remove and destroy dead-heart plants'],chemical:{active:'Seed treatment with Thiamethoxam (as locally approved)',warning:'Apply as seed treatment before sowing',ppe:'Gloves, mask',phi:'Follow label'}},
+  downymildew:{name:'Downy Mildew',type:'Disease',tags:['mold or fungus','yellow leaves'],cause:'Fungus-like pathogen favoured by high humidity and leaf wetness',prevention:['Use resistant varieties','Avoid overcrowded planting'],organic:['Preventive copper-based spray'],mechanical:['Remove and destroy infected plants early'],chemical:{active:'Metalaxyl (as locally approved)',warning:'Apply preventively before humid spells',ppe:'Gloves, mask',phi:'Follow label'}},
+  podborer:{name:'Pod Borer',type:'Pest',tags:['holes in leaves','insects visible'],cause:'Moth larvae feeding on flowers and boring into developing pods',prevention:['Pheromone traps for monitoring','Intercrop with sorghum as a trap border'],organic:['Bt spray at flowering','Neem seed kernel extract'],mechanical:['Hand-pick larvae in small plots'],chemical:{active:'Emamectin benzoate (as locally approved)',warning:'Apply at early flowering for best effect',ppe:'Gloves, mask',phi:'Follow label'}},
+  leafspot:{name:'Leaf Spot',type:'Disease',tags:['brown spots','mold or fungus'],cause:'Fungal disease favoured by humid weather and leaf wetness',prevention:['Crop rotation','Remove infected debris after harvest'],organic:['Preventive copper-based spray'],mechanical:['Remove severely affected leaves'],chemical:{active:'Chlorothalonil (as locally approved)',warning:'Apply preventively',ppe:'Gloves, mask',phi:'Follow label'}},
+  sigatoka:{name:'Sigatoka Leaf Spot',type:'Disease',tags:['brown spots','mold or fungus','yellow leaves'],cause:'Fungal disease of banana leaves, worse in humid, high-rainfall conditions',prevention:['Remove and destroy infected leaves regularly','Ensure good spacing for airflow'],organic:['Preventive copper-based spray'],mechanical:['Deleaf infected leaves regularly'],chemical:{active:'Propiconazole (as locally approved)',warning:'Rotate fungicide classes to avoid resistance',ppe:'Gloves, mask',phi:'Follow label'}},
+  nematode:{name:'Root-knot Nematode',type:'Pest',tags:['wilting','yellow leaves'],cause:'Microscopic soil worms causing root galls and reduced nutrient uptake',prevention:['Crop rotation with non-host crops','Use nematode-free planting material'],organic:['Add neem cake to soil','Marigold intercropping suppresses nematodes'],mechanical:['Soil solarization before planting'],chemical:{active:'Carbofuran soil application (as locally approved)',warning:'Restricted in many regions — check local regulations',ppe:'Gloves, mask',phi:'Follow label strictly'}},
+  fruitfly:{name:'Fruit Fly',type:'Pest',tags:['insects visible','holes in leaves'],cause:'Flies lay eggs in ripening fruit; maggots develop inside causing rot',prevention:['Use fruit fly traps with methyl eugenol lure','Collect and destroy fallen fruit promptly'],organic:['Neem oil spray','Bait traps with jaggery + insecticide in a container (not sprayed on fruit)'],mechanical:['Bag individual fruit with paper/net bags'],chemical:{active:'Spinosad bait application (as locally approved)',warning:'Use bait stations rather than blanket spraying',ppe:'Gloves, mask',phi:'Follow label'}},
+  hopper:{name:'Mango Hopper',type:'Pest',tags:['insects visible','wilting'],cause:'Sap-sucking insect active during flowering, causing flower and fruit drop',prevention:['Avoid dense canopy — prune for airflow','Monitor during flowering season'],organic:['Neem oil spray during flowering'],mechanical:['—'],chemical:{active:'Imidacloprid (as locally approved)',warning:'Avoid spraying during open flowering to protect pollinators',ppe:'Gloves, mask',phi:'Follow label'}},
+  ringspot:{name:'Papaya Ringspot Virus',type:'Disease',tags:['yellow leaves','mold or fungus'],cause:'Virus spread by aphids, causing ring-shaped spots on fruit and leaf distortion',prevention:['Control aphid vectors','Rogue out infected plants promptly','Use tolerant varieties where available'],organic:['Neem oil to reduce aphid vector'],mechanical:['Remove and destroy infected plants immediately'],chemical:{active:'No direct cure — manage the aphid vector',warning:'Focus on prevention and vector control',ppe:'—',phi:'—'}},
+  mite:{name:'Spider Mite',type:'Pest',tags:['yellow leaves','insects visible'],cause:'Tiny mites that feed on leaf undersides, thriving in hot, dry conditions',prevention:['Maintain adequate irrigation to reduce plant stress','Avoid excess dust on foliage'],organic:['Neem oil spray','Spray undersides of leaves with water to disrupt mites'],mechanical:['Remove heavily infested leaves'],chemical:{active:'Abamectin (as locally approved)',warning:'Rotate miticide classes to avoid resistance',ppe:'Gloves, mask, eye protection',phi:'Follow label'}}
+};
+
+</script>
+<script>
+// ===== FARMY App Logic (v2 — connected to real backend) =====
+
+// The backend lives at /api on the SAME Vercel deployment as this page,
+// so there's nothing to configure here — no separate backend URL, no CORS
+// setup needed. If every optional env var (Supabase, OpenWeather,
+// Anthropic) is left unset, FARMY still runs fully in offline "Demo Mode"
+// using its built-in sample data.
+const CONFIG = {
+  API_BASE_URL: '/api'
+};
+
+const state = {
+  user:null, session:null, farmId:null, backendOnline:null,
+  screen:'login',
+  otp:null, otpMode:'demo', pendingContact:'', pendingMethod:'phone', pendingName:'',
+  cropDetailId:null, cropDetailCache:null,
+  recResults:null,
+  soilResult:null,
+  pestSelection:new Set(),
+  myFarm:[], // local fallback store: {cropId, plantedDate, area}
+  farmCropsCache:null,
+  weatherCache:null, weatherLoading:false,
+  chat:[{role:'assistant', text:"Hello! I'm Farmy Assistant 🌱. Ask me anything about planting, watering, fertilizer, pests, or your farm."}],
+  chatBusy:false,
+  banner:null
+};
+
+const $ = sel => document.querySelector(sel);
+const el = (tag, cls, html) => { const e=document.createElement(tag); if(cls) e.className=cls; if(html!==undefined) e.innerHTML=html; return e; };
+
+function findCrop(id){ return CROPS.find(c=>c.id===id); }
+
+function go(screen, extra){
+  state.screen = screen;
+  if(extra) Object.assign(state, extra);
+  render();
+  window.scrollTo(0,0);
+}
+
+// ================= API LAYER =================
+async function apiFetch(path, opts={}){
+  const headers = Object.assign({'Content-Type':'application/json'}, opts.headers||{});
+  if(state.session && state.session.access_token) headers['Authorization'] = 'Bearer ' + state.session.access_token;
+  const res = await fetch(CONFIG.API_BASE_URL + path, Object.assign({}, opts, {headers}));
+  let data = null;
+  try{ data = await res.json(); }catch(e){ /* no body */ }
+  if(!res.ok) throw new Error((data && data.error) || ('Request failed (' + res.status + ')'));
+  return data;
+}
+
+async function checkBackend(){
+  try{
+    const ctrl = new AbortController();
+    const t = setTimeout(()=>ctrl.abort(), 2500);
+    const res = await fetch(CONFIG.API_BASE_URL + '/health', {signal: ctrl.signal});
+    clearTimeout(t);
+    state.backendOnline = !!res.ok;
+  }catch(e){ state.backendOnline = false; }
+  render();
+}
+
+function getBrowserLocation(){
+  return new Promise((resolve)=>{
+    if(!navigator.geolocation){ resolve({lat:13.0827,lng:80.2707,demo:true}); return; } // default: Chennai
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve({lat:pos.coords.latitude, lng:pos.coords.longitude, demo:false}),
+      () => resolve({lat:13.0827,lng:80.2707,demo:true}),
+      {timeout:4000}
+    );
+  });
+}
+
+async function ensureFarm(){
+  if(!state.backendOnline || state.farmId) return;
+  try{
+    const farms = await apiFetch('/farms');
+    if(farms && farms.length){ state.farmId = farms[0].id; return; }
+    const created = await apiFetch('/farms', {method:'POST', body:JSON.stringify({name:'My Farm'})});
+    state.farmId = created.id;
+  }catch(e){ console.warn('ensureFarm failed, continuing in local mode:', e.message); }
+}
+
+// ---------- OTP / LOGIN ----------
+async function sendOtp(){
+  const method = state.pendingMethod;
+  const input = $('#contactInput').value.trim();
+  if(!input){ showBanner('#loginBanner','Please enter your '+ (method==='phone'?'phone number':'email address'),'warn'); return; }
+  if(method==='phone' && !/^\d{7,15}$/.test(input.replace(/\s+/g,''))){ showBanner('#loginBanner','Enter a valid phone number (digits only)','warn'); return; }
+  if(method==='email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input)){ showBanner('#loginBanner','Enter a valid email address','warn'); return; }
+  state.pendingContact = input;
+
+  if(state.backendOnline){
+    try{
+      await apiFetch('/auth/send-otp', {method:'POST', body:JSON.stringify({contact:input, method})});
+      state.otpMode = 'live';
+      go('otp');
+      return;
+    }catch(e){
+      console.warn('Live OTP send failed, falling back to demo mode:', e.message);
+    }
+  }
+  // Demo fallback — no reachable backend (or Supabase phone/email provider not yet configured)
+  state.otp = String(Math.floor(1000 + Math.random()*9000));
+  state.otpMode = 'demo';
+  go('otp');
+}
+
+async function verifyOtp(){
+  const entered = $('#otpInput').value.trim();
+
+  if(state.otpMode==='live'){
+    try{
+      const data = await apiFetch('/auth/verify-otp', {method:'POST', body:JSON.stringify({
+        contact: state.pendingContact, method: state.pendingMethod, code: entered, fullName: state.pendingName
+      })});
+      state.session = data.session;
+      state.user = { id:data.user.id, name: state.pendingName || (state.pendingMethod==='phone'?'Farmer':state.pendingContact.split('@')[0]), contact: state.pendingContact, method: state.pendingMethod };
+      await ensureFarm();
+      go('home');
+    }catch(e){
+      showBanner('#otpBanner', e.message, 'warn');
+    }
+    return;
+  }
+
+  // Demo fallback verification
+  if(entered === state.otp){
+    state.user = { name: state.pendingName || (state.pendingMethod==='phone'?'Farmer':state.pendingContact.split('@')[0]), contact: state.pendingContact, method: state.pendingMethod };
+    go('home');
+  } else {
+    showBanner('#otpBanner','Incorrect code. Please try again.','warn');
+  }
+}
+
+function showBanner(sel, msg, kind){
+  const b = $(sel); if(!b) return;
+  b.textContent = msg; b.className = 'banner show ' + (kind||'');
+  clearTimeout(b._t); b._t = setTimeout(()=>{ b.className='banner'; }, 4000);
+}
+
+// ---------- WEATHER ----------
+function getWeatherDemo(){
+  return { temp: 29, humidity: 68, condition:'Partly cloudy (demo data)', rainChance: 30, forecast:[
+    {d:'Today',t:29,r:30},{d:'Tomorrow',t:31,r:10},{d:'Wed',t:27,r:60},{d:'Thu',t:28,r:45},{d:'Fri',t:30,r:15}
+  ]};
+}
+function weatherAlerts(w){
+  const alerts=[];
+  if(w.rainChance>=60) alerts.push({icon:'🚨',text:'Heavy rain expected — consider skipping irrigation today.'});
+  if(w.temp>=34) alerts.push({icon:'🔥',text:'High temperature — increase irrigation monitoring for heat-sensitive crops.'});
+  if(w.humidity>=80) alerts.push({icon:'🐛',text:'High humidity may increase fungal disease risk — inspect crops closely.'});
+  if(alerts.length===0) alerts.push({icon:'✅',text:'No major weather risks right now — normal care applies.'});
+  return alerts;
+}
+async function loadWeather(){
+  if(state.weatherCache) return state.weatherCache;
+  if(state.backendOnline){
+    try{
+      const coords = await getBrowserLocation();
+      const data = await apiFetch(`/weather?lat=${coords.lat}&lng=${coords.lng}`);
+      state.weatherCache = data;
+      return data;
+    }catch(e){ console.warn('Live weather failed, using demo weather:', e.message); }
+  }
+  state.weatherCache = getWeatherDemo();
+  return state.weatherCache;
+}
+async function triggerWeatherLoad(){
+  if(state.weatherLoading || state.weatherCache) return;
+  state.weatherLoading = true;
+  await loadWeather();
+  state.weatherLoading = false;
+  render();
+}
+
+// ---------- LOCAL FALLBACK: RECOMMENDATION ENGINE ----------
+function scoreCropLocal(crop, cond){
+  let score = 0, reasons = [];
+  if(cond.ph!=null){
+    if(cond.ph>=crop.ph[0] && cond.ph<=crop.ph[1]){ score+=25; reasons.push({ok:true,text:`Soil pH ${cond.ph} is within the ideal ${crop.ph[0]}–${crop.ph[1]} range`}); }
+    else { const dist=Math.min(Math.abs(cond.ph-crop.ph[0]),Math.abs(cond.ph-crop.ph[1])); score+=Math.max(0,25-dist*20); reasons.push({ok:false,text:`Soil pH ${cond.ph} is outside the ideal ${crop.ph[0]}–${crop.ph[1]} range`}); }
+  }
+  if(cond.temp!=null){
+    if(cond.temp>=crop.temp[0] && cond.temp<=crop.temp[1]){ score+=25; reasons.push({ok:true,text:`Temperature ${cond.temp}°C fits the ideal ${crop.temp[0]}–${crop.temp[1]}°C range`}); }
+    else { const dist=Math.min(Math.abs(cond.temp-crop.temp[0]),Math.abs(cond.temp-crop.temp[1])); score+=Math.max(0,25-dist*2.5); reasons.push({ok:false,text:`Temperature ${cond.temp}°C is outside the ideal ${crop.temp[0]}–${crop.temp[1]}°C range`}); }
+  }
+  if(cond.soil){
+    if(crop.soils.includes(cond.soil)){ score+=20; reasons.push({ok:true,text:`${cond.soil} soil suits this crop`}); }
+    else { score+=5; reasons.push({ok:false,text:`${cond.soil} soil isn't ideal — best suited to ${crop.soils.join(' or ')}`}); }
+  }
+  if(cond.waterAvail){
+    const order = {Low:0,Medium:1,High:2};
+    const need = order[crop.water.split('-')[0]] ?? 1;
+    const have = order[cond.waterAvail];
+    if(have>=need){ score+=15; reasons.push({ok:true,text:`Your water availability (${cond.waterAvail}) meets this crop's ${crop.water} requirement`}); }
+    else { score+=Math.max(0,15-(need-have)*8); reasons.push({ok:false,text:`Your water availability (${cond.waterAvail}) is below this crop's ${crop.water} requirement`}); }
+  }
+  if(cond.season){
+    const seasonMatch = crop.seasons.some(s=>s.toLowerCase().includes(cond.season.toLowerCase()));
+    if(seasonMatch){ score+=15; reasons.push({ok:true,text:`${cond.season} matches this crop's growing season`}); }
+    else { reasons.push({ok:false,text:`${cond.season} is not this crop's typical season (best: ${crop.seasons.join(', ')})`}); }
+  }
+  score = Math.round(Math.max(0,Math.min(100,score)));
+  let label, cls;
+  if(score>=80){label='Highly Suitable';cls='great';}
+  else if(score>=60){label='Suitable';cls='good';}
+  else if(score>=40){label='Moderately Suitable';cls='ok';}
+  else {label='Not Recommended';cls='bad';}
+  return {crop, score, label, cls, reasons};
+}
+function runRecommendationLocal(cond){
+  return CROPS.map(c=>scoreCropLocal(c,cond)).sort((a,b)=>b.score-a.score);
+}
+async function runRecommendation(cond){
+  if(state.backendOnline){
+    try{
+      const results = await apiFetch('/recommend', {method:'POST', body:JSON.stringify(cond)});
+      state.recResults = results.map(r=>({ crop: findCrop(r.crop.id) || r.crop, score:r.score, label:r.label,
+        cls: r.score>=80?'great':r.score>=60?'good':r.score>=40?'ok':'bad', reasons:r.reasons }));
+      return;
+    }catch(e){ console.warn('Live recommend failed, using local engine:', e.message); }
+  }
+  state.recResults = runRecommendationLocal(cond);
+}
+
+// ---------- LOCAL FALLBACK: SOIL HEALTH ----------
+function soilHealthScoreLocal(s){
+  let score=0, notes=[];
+  const npkScore = v => v==='Medium'?10:(v==='High'?8:4);
+  score += npkScore(s.n) + npkScore(s.p) + npkScore(s.k);
+  if(s.n==='Low') notes.push('Nitrogen is low — consider adding compost, FYM, or a nitrogen-rich fertilizer.');
+  if(s.p==='Low') notes.push('Phosphorus is low — consider rock phosphate or DAP application.');
+  if(s.k==='Low') notes.push('Potassium is low — consider potash (MOP) application.');
+  const phDist = Math.abs(s.ph - 6.5);
+  score += Math.max(0, 10 - phDist*6);
+  if(s.ph<6.0) notes.push('Soil is acidic — agricultural lime can help raise pH gradually.');
+  if(s.ph>7.5) notes.push('Soil is alkaline — organic matter and gypsum can help over time.');
+  const moistScore = s.moisture==='Medium'?10:(s.moisture==='High'?7:5);
+  score += moistScore;
+  if(s.moisture==='Low') notes.push('Soil moisture is low — increase irrigation frequency or add mulch.');
+  if(s.moisture==='High') notes.push('Soil moisture is high — check drainage to avoid root rot.');
+  score = Math.round(Math.min(100,(score/50)*100));
+  let label = score>=75?'Good':(score>=50?'Fair':'Needs Improvement');
+  return {score,label,notes};
+}
+function compareSoilToCropLocal(s, crop){
+  const msgs=[];
+  if(s.ph<crop.ph[0]) msgs.push({icon:'⚠️',text:`Your soil pH (${s.ph}) is lower than the ideal range for ${crop.name} (${crop.ph[0]}–${crop.ph[1]}).`});
+  else if(s.ph>crop.ph[1]) msgs.push({icon:'⚠️',text:`Your soil pH (${s.ph}) is higher than the ideal range for ${crop.name} (${crop.ph[0]}–${crop.ph[1]}).`});
+  else msgs.push({icon:'✅',text:`Your soil pH (${s.ph}) fits ${crop.name}'s ideal range (${crop.ph[0]}–${crop.ph[1]}).`});
+  if(!crop.soils.includes(s.type)) msgs.push({icon:'⚠️',text:`${crop.name} grows best in ${crop.soils.join(' or ')} — your soil is ${s.type}.`});
+  else msgs.push({icon:'✅',text:`${s.type} soil is well suited to ${crop.name}.`});
+  return msgs;
+}
+async function submitSoilCheck(s){
+  if(state.backendOnline){
+    try{
+      const data = await apiFetch('/soil/check', {method:'POST', body:JSON.stringify({
+        soilType:s.type, ph:s.ph, nitrogenLevel:s.n, phosphorusLevel:s.p, potassiumLevel:s.k, moistureLevel:s.moisture
+      })});
+      return { input:s, health:{score:data.score, label:data.label, notes:data.notes} };
+    }catch(e){ console.warn('Live soil check failed, using local scoring:', e.message); }
+  }
+  return { input:s, health: soilHealthScoreLocal(s) };
+}
+async function fetchSoilCompare(s, cropId){
+  if(state.backendOnline){
+    try{
+      return await apiFetch('/soil/compare', {method:'POST', body:JSON.stringify({ph:s.ph, soilType:s.type, cropId})});
+    }catch(e){ console.warn('Live soil compare failed, using local comparison:', e.message); }
+  }
+  return compareSoilToCropLocal(s, findCrop(cropId));
+}
+
+// ---------- WEATHER SUITABILITY (local — same logic either way) ----------
+function weatherSuitability(crop, w){
+  const msgs=[]; let score=100;
+  if(w.temp<crop.temp[0]||w.temp>crop.temp[1]){ msgs.push({icon:'❌',text:`Current temperature (${w.temp}°C) is outside ${crop.name}'s ideal range (${crop.temp[0]}–${crop.temp[1]}°C).`}); score-=30; }
+  else msgs.push({icon:'✅',text:`Current temperature (${w.temp}°C) suits ${crop.name}.`});
+  if(w.humidity>crop.humidity[1]+15){ msgs.push({icon:'⚠️',text:`Humidity (${w.humidity}%) is quite high for ${crop.name} — risk of fungal disease may increase.`}); score-=15; }
+  else if(w.humidity<crop.humidity[0]-15){ msgs.push({icon:'⚠️',text:`Humidity (${w.humidity}%) is quite low for ${crop.name}.`}); score-=10; }
+  else msgs.push({icon:'✅',text:`Humidity (${w.humidity}%) is acceptable for ${crop.name}.`});
+  if(w.rainChance>60 && crop.water==='Low'){ msgs.push({icon:'⚠️',text:`Heavy rain expected — ${crop.name} prefers drier conditions, watch for waterlogging.`}); score-=10; }
+  return {msgs, score: Math.max(0,score)};
+}
+
+// ---------- LOCAL FALLBACK: YIELD & PROFIT ----------
+function predictYieldLocal(crop, area, soilScore, method){
+  const [lo,hi] = crop.yieldPerAcre;
+  let mult = 0.75 + (soilScore/100)*0.4;
+  if(method==='organic') mult *= 0.92;
+  const low = Math.round(lo*area*mult*0.9);
+  const high = Math.round(hi*area*mult*1.05);
+  return {low, high, unit:'kg'};
+}
+async function submitYieldPrediction(cropId, area, soilScore, method){
+  if(state.backendOnline){
+    try{
+      const farmCropId = null;
+      const data = await apiFetch('/yield/predict', {method:'POST', body:JSON.stringify({farmCropId, cropId, areaAcres:area, soilHealthScore:soilScore, farmingMethod:method})});
+      return {low:data.low, high:data.high, unit:data.unit};
+    }catch(e){ console.warn('Live yield predict failed, using local formula:', e.message); }
+  }
+  return predictYieldLocal(findCrop(cropId), area, soilScore, method);
+}
+async function submitProfitCalc(payload){
+  if(state.backendOnline){
+    try{
+      const data = await apiFetch('/profit/calculate', {method:'POST', body:JSON.stringify(payload)});
+      return { cost:data.totalCost, revenue:data.expectedRevenue, profit:data.estimatedProfit, perAcre:data.profitPerAcre };
+    }catch(e){ console.warn('Live profit calc failed, using local math:', e.message); }
+  }
+  const cost = payload.seedCost+payload.fertilizerCost+payload.labourCost+payload.irrigationCost+payload.otherCost;
+  const revenue = payload.expectedYield*payload.sellingPrice;
+  const profit = revenue-cost;
+  return { cost, revenue, profit, perAcre: Math.round(profit/(payload.areaAcres||1)) };
+}
+
+// ================= RENDER =================
+function render(){
+  const root = $('#app');
+  root.innerHTML = '';
+  root.appendChild(renderScreen());
+  const nav = $('#bottomNav');
+  if(state.user && !['login','otp'].includes(state.screen)){
+    nav.style.display='flex';
+    document.querySelectorAll('#bottomNav .navitem').forEach(b=>{
+      b.classList.toggle('active', b.dataset.screen===topLevel(state.screen));
+    });
+  } else { nav.style.display='none'; }
+}
+
+function topLevel(s){
+  if(['cropDetail','cropList','recommend'].includes(s)) return 'recommend';
+  if(['soil','pest','weather'].includes(s)) return 'tools';
+  if(s==='myfarm') return 'myfarm';
+  if(s==='assistant') return 'assistant';
+  return 'home';
+}
+
+function header(title, back){
+  const h = el('div','topbar');
+  h.innerHTML = `${back?`<button class="iconbtn" onclick="go('${back}')">←</button>`:'<span class="iconbtn spacer"></span>'}<h1>${title}</h1><span class="iconbtn spacer"></span>`;
+  return h;
+}
+
+function statusPill(){
+  if(state.backendOnline===null) return '';
+  return state.backendOnline
+    ? `<div class="statuspill on">🟢 Connected to live backend</div>`
+    : `<div class="statuspill off">🟡 Demo mode — backend not reachable, showing sample data</div>`;
+}
+
+function renderScreen(){
+  switch(state.screen){
+    case 'login': return screenLogin();
+    case 'otp': return screenOtp();
+    case 'home': return screenHome();
+    case 'recommend': return screenRecommend();
+    case 'cropList': return screenCropList();
+    case 'cropDetail': return screenCropDetail();
+    case 'pest': return screenPest();
+    case 'soil': return screenSoil();
+    case 'weather': return screenWeather();
+    case 'myfarm': return screenMyFarm();
+    case 'yield': return screenYield();
+    case 'profit': return screenProfit();
+    case 'assistant': return screenAssistant();
+    default: return screenHome();
+  }
+}
+
+// ---- LOGIN ----
+function screenLogin(){
+  const wrap = el('div','screen login-screen');
+  wrap.innerHTML = `
+    <div class="login-hero">
+      <div class="brandmark">🌾</div>
+      <h1 class="brand">FARMY</h1>
+      <p class="tagline">Your smart farming companion</p>
+    </div>
+    <div class="login-card">
+      ${statusPill()}
+      <div class="segmented">
+        <button class="seg ${state.pendingMethod==='phone'?'active':''}" onclick="setMethod('phone')">Phone</button>
+        <button class="seg ${state.pendingMethod==='email'?'active':''}" onclick="setMethod('email')">Email</button>
+      </div>
+      <label class="fieldlabel">${state.pendingMethod==='phone'?'Phone number':'Email address'}</label>
+      <input id="contactInput" class="textfield" type="${state.pendingMethod==='phone'?'tel':'email'}" placeholder="${state.pendingMethod==='phone'?'e.g. 9876543210':'e.g. name@example.com'}" value="${state.pendingContact}">
+      <label class="fieldlabel">Your name (optional)</label>
+      <input id="nameInput" class="textfield" type="text" placeholder="e.g. Ravi Kumar" value="${state.pendingName}" oninput="state.pendingName=this.value">
+      <div id="loginBanner" class="banner"></div>
+      <button class="btn-primary big" onclick="sendOtp()">Send OTP</button>
+      <p class="finetext">We'll send a one-time code to verify it's you. No password needed.</p>
+    </div>`;
+  return wrap;
+}
+function setMethod(m){ state.pendingMethod=m; state.pendingContact=''; render(); }
+
+function screenOtp(){
+  const wrap = el('div','screen login-screen');
+  const demoNote = state.otpMode==='demo'
+    ? `<div class="demo-otp-note">📩 Demo mode: FARMY's backend isn't reachable right now, so here's a local demo code instead of a real SMS/email: <strong>${state.otp}</strong>.</div>`
+    : `<div class="demo-otp-note live">📩 A real code was sent to ${state.pendingContact}. Check your ${state.pendingMethod==='phone'?'SMS inbox':'email'}.</div>`;
+  wrap.innerHTML = `
+    <div class="login-hero small">
+      <div class="brandmark">🔐</div>
+      <h1 class="brand small">Verify your code</h1>
+      <p class="tagline">Code sent to ${state.pendingContact}</p>
+    </div>
+    <div class="login-card">
+      ${demoNote}
+      <label class="fieldlabel">Enter code</label>
+      <input id="otpInput" class="textfield otp-input" type="tel" maxlength="6" placeholder="••••">
+      <div id="otpBanner" class="banner"></div>
+      <button class="btn-primary big" onclick="verifyOtp()">Verify & Continue</button>
+      <button class="btn-text" onclick="go('login')">← Use a different number/email</button>
+    </div>`;
+  return wrap;
+}
+
+// ---- HOME ----
+function screenHome(){
+  const wrap = el('div','screen');
+  if(!state.weatherCache) triggerWeatherLoad();
+  const w = state.weatherCache || {temp:'--', condition:'Loading…', humidity:'--', rainChance:'--'};
+  const alerts = state.weatherCache ? weatherAlerts(w) : [];
+  const seasonCrops = CROPS.filter(c=>c.seasons.some(s=>s.toLowerCase().includes('kharif'))).slice(0,4);
+  const popular = [findCrop('tomato'),findCrop('rice'),findCrop('onion'),findCrop('banana')];
+  wrap.innerHTML = `
+    ${statusPill()}
+    <div class="home-header">
+      <div>
+        <p class="greeting">Welcome back,</p>
+        <h1 class="farmer-name">${state.user.name} 👋</h1>
+      </div>
+      <div class="avatar">${state.user.name.charAt(0).toUpperCase()}</div>
+    </div>
+    <div class="searchbar" onclick="go('cropList')">
+      <span>🔍</span><span class="searchph">Search a crop — tomato, rice, mango…</span>
+    </div>
+    <button class="cta-banner" onclick="go('recommend')">
+      <div><div class="cta-title">Find Suitable Crop</div><div class="cta-sub">Answer a few questions about your land</div></div>
+      <div class="cta-arrow">→</div>
+    </button>
+    <div class="weather-card" onclick="go('weather')">
+      <div class="wtemp">${w.temp}${w.temp!=='--'?'°C':''}</div>
+      <div class="wdetails"><div>${w.condition}</div><div class="wsub">Humidity ${w.humidity}% · Rain chance ${w.rainChance}%</div></div>
+      <div class="wmore">Details →</div>
+    </div>
+    ${alerts.length?`<div class="alertbox">${alerts.map(a=>`<div class="alertrow">${a.icon} ${a.text}</div>`).join('')}</div>`:''}
+    <h2 class="section-title">Recommended for Kharif season</h2>
+    <div class="hscroll">${seasonCrops.map(cropChip).join('')}</div>
+    <h2 class="section-title">Popular crops</h2>
+    <div class="hscroll">${popular.map(cropChip).join('')}</div>
+    <h2 class="section-title">Quick access</h2>
+    <div class="quickgrid">
+      <button class="quickcard" onclick="go('myfarm')"><span>🚜</span>My Farm</button>
+      <button class="quickcard" onclick="go('pest')"><span>🐛</span>Pest Check</button>
+      <button class="quickcard" onclick="go('soil')"><span>🧪</span>Soil Check</button>
+      <button class="quickcard" onclick="go('profit')"><span>💰</span>Profit Calc</button>
+    </div>
+  `;
+  return wrap;
+}
+function cropChip(c){
+  return `<button class="cropchip" onclick="go('cropDetail',{cropDetailId:'${c.id}',cropDetailCache:null})"><span class="chipemoji">${c.emoji}</span><span>${c.name}</span></button>`;
+}
+
+// ---- RECOMMEND ----
+function screenRecommend(){
+  const wrap = el('div','screen');
+  wrap.appendChild(header('Find Suitable Crop','home'));
+  const body = el('div','content');
+  if(!state.recResults){
+    body.innerHTML = `
+      <p class="hint">Tell us about your land and conditions — we'll compare it against our crop database.</p>
+      <label class="fieldlabel">Soil type</label>
+      <select id="f_soil" class="textfield">${['Loamy','Sandy loam','Sandy','Clay','Clay loam'].map(s=>`<option>${s}</option>`).join('')}</select>
+      <label class="fieldlabel">Soil pH</label>
+      <input id="f_ph" class="textfield" type="number" step="0.1" value="6.5">
+      <label class="fieldlabel">Temperature (°C)</label>
+      <input id="f_temp" class="textfield" type="number" value="27">
+      <label class="fieldlabel">Water availability</label>
+      <select id="f_water" class="textfield">${['Low','Medium','High'].map(s=>`<option>${s}</option>`).join('')}</select>
+      <label class="fieldlabel">Current season</label>
+      <select id="f_season" class="textfield">${['Kharif','Rabi','Zaid'].map(s=>`<option>${s}</option>`).join('')}</select>
+      <button class="btn-primary big" id="recBtn" onclick="submitRecommend()">Get Recommendations</button>
+    `;
+  } else {
+    body.innerHTML = `<p class="hint">Based on your conditions, here's how each crop compares:</p>
+      <div class="reslist">${state.recResults.map(r=>`
+        <button class="rescard" onclick="go('cropDetail',{cropDetailId:'${r.crop.id}',cropDetailCache:null})">
+          <div class="rescard-top">
+            <span class="chipemoji">${r.crop.emoji}</span>
+            <div class="rescard-name">${r.crop.name}<div class="rescard-sci">${r.crop.sci}</div></div>
+            <span class="badge ${r.cls}">${r.label}</span>
+          </div>
+          <div class="scorebar"><div class="scorebar-fill ${r.cls}" style="width:${r.score}%"></div></div>
+          <div class="score-num">${r.score}/100</div>
+          <ul class="reasonlist">${r.reasons.slice(0,3).map(rs=>`<li class="${rs.ok?'ok':'no'}">${rs.ok?'✓':'✕'} ${rs.text}</li>`).join('')}</ul>
+        </button>`).join('')}
+      </div>
+      <button class="btn-secondary big" onclick="state.recResults=null; render();">↻ Try different conditions</button>`;
+  }
+  wrap.appendChild(body);
+  return wrap;
+}
+async function submitRecommend(){
+  const btn = $('#recBtn'); if(btn){ btn.textContent='Finding crops…'; btn.disabled=true; }
+  const cond = {
+    soil: $('#f_soil').value, ph: parseFloat($('#f_ph').value), temp: parseFloat($('#f_temp').value),
+    waterAvail: $('#f_water').value, season: $('#f_season').value
+  };
+  await runRecommendation(cond);
+  render();
+}
+
+// ---- CROP LIST / SEARCH ----
+function screenCropList(){
+  const wrap = el('div','screen');
+  wrap.appendChild(header('Crop Database','home'));
+  const body = el('div','content');
+  body.innerHTML = `<input id="cropSearch" class="textfield" placeholder="Search crops…" oninput="filterCropList(this.value)">
+    <div id="cropListItems" class="croplistitems"></div>`;
+  wrap.appendChild(body);
+  setTimeout(()=>filterCropList(''),0);
+  return wrap;
+}
+async function filterCropList(q){
+  const list = $('#cropListItems'); if(!list) return;
+  let items = CROPS;
+  if(state.backendOnline){
+    try{ items = await apiFetch('/crops' + (q?`?search=${encodeURIComponent(q)}`:'')); }
+    catch(e){ items = CROPS.filter(c=>c.name.toLowerCase().includes(q.toLowerCase())); }
+  } else {
+    items = CROPS.filter(c=>c.name.toLowerCase().includes(q.toLowerCase())||c.category.toLowerCase().includes(q.toLowerCase()));
+  }
+  if(!$('#cropListItems')) return; // user navigated away while awaiting
+  $('#cropListItems').innerHTML = items.map(c=>`
+    <button class="listrow" onclick="go('cropDetail',{cropDetailId:'${c.id}',cropDetailCache:null})">
+      <span class="chipemoji">${c.emoji}</span>
+      <div><div class="listrow-name">${c.name}</div><div class="listrow-sub">${c.category} · ${(c.seasons||[c.season])[0]}</div></div>
+      <span class="chev">›</span>
+    </button>`).join('') || '<p class="hint">No crops match your search.</p>';
+}
+
+// ---- CROP DETAIL ----
+let activeTab = 'overview';
+function screenCropDetail(){
+  const localCrop = findCrop(state.cropDetailId) || CROPS[0];
+  const wrap = el('div','screen');
+  wrap.appendChild(header(localCrop.name,'cropList'));
+  const body = el('div','content');
+  const tabs = ['overview','soil','water','fertilizer','timeline'];
+  body.id = 'cropDetailBody';
+  body.innerHTML = `
+    <div class="crophero"><span class="crophero-emoji">${localCrop.emoji}</span><div><div class="crophero-name">${localCrop.name}</div><div class="crophero-sci">${localCrop.sci} · ${localCrop.category}</div></div></div>
+    <div class="tabbar">${tabs.map(t=>`<button class="tab ${activeTab===t?'active':''}" onclick="setTab('${t}')">${t.charAt(0).toUpperCase()+t.slice(1)}</button>`).join('')}</div>
+    <div id="tabcontent">${tabContent(localCrop, activeTab)}</div>
+    <button class="btn-secondary big" onclick="go('pest',{})">🐛 Check pests for this crop</button>
+    <button class="btn-secondary big" onclick="addToFarmPrompt('${localCrop.id}')">➕ Add to My Farm</button>
+  `;
+  wrap.appendChild(body);
+  return wrap;
+}
+function setTab(t){ activeTab=t; const c=findCrop(state.cropDetailId); $('#tabcontent').innerHTML = tabContent(c,t); document.querySelectorAll('.tabbar .tab').forEach(b=>b.classList.toggle('active', b.textContent.toLowerCase()===t)); }
+
+function tabContent(crop, tab){
+  if(tab==='overview'){
+    return `
+      <div class="infogrid">
+        <div class="infobox"><div class="infolabel">Best season</div><div class="infoval">${crop.seasons.join(', ')}</div></div>
+        <div class="infobox"><div class="infolabel">Planting months</div><div class="infoval">${crop.months}</div></div>
+        <div class="infobox"><div class="infolabel">Temp range</div><div class="infoval">${crop.temp[0]}–${crop.temp[1]}°C</div></div>
+        <div class="infobox"><div class="infolabel">Duration</div><div class="infoval">${crop.duration} days</div></div>
+      </div>
+      <h3 class="subhead">Planting guide</h3>
+      <ol class="steplist">${crop.planting.map(p=>`<li>${p}</li>`).join('')}</ol>
+    `;
+  }
+  if(tab==='soil'){
+    return `
+      <div class="infogrid">
+        <div class="infobox"><div class="infolabel">Ideal pH</div><div class="infoval">${crop.ph[0]}–${crop.ph[1]}</div></div>
+        <div class="infobox"><div class="infolabel">Soil types</div><div class="infoval">${crop.soils.join(', ')}</div></div>
+        <div class="infobox"><div class="infolabel">Humidity</div><div class="infoval">${crop.humidity[0]}–${crop.humidity[1]}%</div></div>
+        <div class="infobox"><div class="infolabel">Sunlight</div><div class="infoval">${crop.sunlight}</div></div>
+      </div>
+      <p class="notebox">🌧️ Rainfall: ${crop.rainfall}</p>
+      <div class="minitool">
+        <h3 class="subhead">Compare with your soil</h3>
+        <button class="btn-secondary" onclick="go('soil',{})">Run Soil Check →</button>
+      </div>
+    `;
+  }
+  if(tab==='water'){
+    return `
+      <div class="infogrid">
+        <div class="infobox"><div class="infolabel">Water need</div><div class="infoval">${crop.water}</div></div>
+        <div class="infobox"><div class="infolabel">Irrigation</div><div class="infoval">${crop.irrigation}</div></div>
+      </div>
+      <p class="notebox">⚠️ Critical stage: ${crop.waterCritical}</p>
+      <p class="notebox warn">Avoid both overwatering (root rot, fungal disease) and underwatering (stunted growth, flower/fruit drop) — check soil moisture before each irrigation.</p>
+    `;
+  }
+  if(tab==='fertilizer'){
+    const n = crop.npk;
+    return `
+      <div class="infogrid">
+        <div class="infobox"><div class="infolabel">Nitrogen (N)</div><div class="infoval">${n.n}${n.note?' '+n.note:' kg/acre'}</div></div>
+        <div class="infobox"><div class="infolabel">Phosphorus (P)</div><div class="infoval">${n.p}${n.note?' '+n.note:' kg/acre'}</div></div>
+        <div class="infobox"><div class="infolabel">Potassium (K)</div><div class="infoval">${n.k}${n.note?' '+n.note:' kg/acre'}</div></div>
+      </div>
+      <p class="notebox">📋 ${crop.fertNote}</p>
+      <p class="notebox warn">Fertilizer needs vary by local soil test results — this is a general guide, not a substitute for a soil test or local agricultural advice.</p>
+    `;
+  }
+  if(tab==='timeline'){
+    return `<div class="timeline">${crop.stages.map((s,i)=>`
+      <div class="tlstep">
+        <div class="tldot">${i+1}</div>
+        <div class="tlbody">
+          <div class="tlname">${s.name} <span class="tldays">Day ${s.days}</span></div>
+          <div class="tlrow"><b>Care:</b> ${s.care}</div>
+          <div class="tlrow"><b>Water:</b> ${s.water}</div>
+          <div class="tlrow"><b>Fertilizer:</b> ${s.fert}</div>
+          <div class="tlrow warn"><b>Watch out:</b> ${s.warn}</div>
+        </div>
+      </div>`).join('')}</div>`;
+  }
+  return '';
+}
+
+async function addToFarmPrompt(cropId){
+  const crop = findCrop(cropId);
+  const area = prompt(`Farm area in acres for ${crop.name}?`, '1');
+  if(area===null) return;
+  const date = prompt('Planting date (YYYY-MM-DD)?', new Date().toISOString().slice(0,10));
+  if(date===null) return;
+
+  if(state.backendOnline){
+    try{
+      await ensureFarm();
+      if(state.farmId){
+        await apiFetch(`/farms/${state.farmId}/crops`, {method:'POST', body:JSON.stringify({cropId, areaAcres:parseFloat(area)||1, plantedDate:date})});
+        state.farmCropsCache = null; // force refresh
+        go('myfarm');
+        return;
+      }
+    }catch(e){ console.warn('Live add-to-farm failed, saving locally:', e.message); }
+  }
+  state.myFarm.push({cropId, area: parseFloat(area)||1, plantedDate: date});
+  go('myfarm');
+}
+
+// ---- PEST ----
+const SYMPTOMS = ['Yellow leaves','Brown spots','Holes in leaves','Wilting','Insects visible','Mold or fungus'];
+function screenPest(){
+  const wrap = el('div','screen');
+  wrap.appendChild(header('Pest & Disease Check','home'));
+  const body = el('div','content');
+  body.innerHTML = `
+    <p class="hint">Select the symptoms you see on your crop:</p>
+    <div class="chipgrid">${SYMPTOMS.map(s=>`<button class="symptomchip ${state.pestSelection.has(s)?'active':''}" onclick="toggleSymptom('${s}')">${s}</button>`).join('')}</div>
+    <div id="pestResults">${state.pestSelection.size?'<p class="hint">Loading matches…</p>':'<p class="hint">Pick one or more symptoms above to see likely causes.</p>'}</div>
+    <p class="notebox warn">⚠️ Always follow your local agricultural authority's recommendations and product labels before using any pesticide.</p>
+  `;
+  wrap.appendChild(body);
+  if(state.pestSelection.size) refreshPestResults();
+  return wrap;
+}
+function toggleSymptom(s){
+  state.pestSelection.has(s)?state.pestSelection.delete(s):state.pestSelection.add(s);
+  document.querySelectorAll('.symptomchip').forEach(c=>c.classList.toggle('active', state.pestSelection.has(c.textContent)));
+  refreshPestResults();
+}
+function pestMatchLocal(sel){
+  const matches = Object.entries(PESTS).map(([id,p])=>({id,...p,matchCount:sel.filter(s=>p.tags.includes(s)).length})).filter(p=>p.matchCount>0).sort((a,b)=>b.matchCount-a.matchCount);
+  return matches;
+}
+async function refreshPestResults(){
+  const target = $('#pestResults'); if(!target) return;
+  const sel = [...state.pestSelection];
+  if(sel.length===0){ target.innerHTML = '<p class="hint">Pick one or more symptoms above to see likely causes.</p>'; return; }
+  let matches;
+  if(state.backendOnline){
+    try{
+      const data = await apiFetch('/pests/match', {method:'POST', body:JSON.stringify({symptoms:sel})});
+      matches = data.map(p=>({ id:p.id, name:p.name, type:p.type, cause:p.cause,
+        prevention:p.prevention, organic:p.organic_control, mechanical:p.mechanical_control,
+        chemical:{active:p.chemical_active_ingredient, warning:p.chemical_warning, ppe:p.chemical_ppe, phi:p.chemical_phi} }));
+    }catch(e){ console.warn('Live pest match failed, using local data:', e.message); matches = pestMatchLocal(sel); }
+  } else {
+    matches = pestMatchLocal(sel);
+  }
+  if(!$('#pestResults')) return;
+  if(matches.length===0){ target.innerHTML = '<p class="hint">No close matches found — consider consulting a local agricultural extension officer.</p>'; return; }
+  target.innerHTML = `<div class="reslist">${matches.slice(0,5).map(p=>`
+    <div class="pestcard">
+      <div class="pestcard-top"><span class="badge ${p.type==='Pest'?'ok':'warn2'}">${p.type}</span><span class="pestname">${p.name}</span></div>
+      <p class="pest-cause">${p.cause}</p>
+      <details><summary>Prevention & IPM options</summary>
+        <b>Prevention</b><ul>${p.prevention.map(x=>`<li>${x}</li>`).join('')}</ul>
+        <b>Organic control</b><ul>${p.organic.map(x=>`<li>${x}</li>`).join('')}</ul>
+        <b>Mechanical control</b><ul>${p.mechanical.map(x=>`<li>${x}</li>`).join('')}</ul>
+        ${!/No (reliable curative|direct cure)/.test(p.chemical.active) ? `<b>If chemical control is needed</b>
+        <ul><li>Active ingredient: ${p.chemical.active}</li><li>${p.chemical.warning}</li><li>Protective equipment: ${p.chemical.ppe}</li><li>Pre-harvest interval: ${p.chemical.phi}</li></ul>` : `<p class="notebox">${p.chemical.active}</p>`}
+      </details>
+    </div>`).join('')}</div>`;
+}
+
+// ---- SOIL ----
+function screenSoil(){
+  const wrap = el('div','screen');
+  wrap.appendChild(header('Soil Check','home'));
+  const body = el('div','content');
+  if(!state.soilResult){
+    body.innerHTML = `
+      <label class="fieldlabel">Soil type</label>
+      <select id="s_type" class="textfield">${['Loamy','Sandy loam','Sandy','Clay','Clay loam'].map(s=>`<option>${s}</option>`).join('')}</select>
+      <label class="fieldlabel">Soil pH</label>
+      <input id="s_ph" class="textfield" type="number" step="0.1" value="6.5">
+      <label class="fieldlabel">Nitrogen level</label>
+      <select id="s_n" class="textfield">${['Low','Medium','High'].map(s=>`<option>${s}</option>`).join('')}</select>
+      <label class="fieldlabel">Phosphorus level</label>
+      <select id="s_p" class="textfield">${['Low','Medium','High'].map(s=>`<option>${s}</option>`).join('')}</select>
+      <label class="fieldlabel">Potassium level</label>
+      <select id="s_k" class="textfield">${['Low','Medium','High'].map(s=>`<option>${s}</option>`).join('')}</select>
+      <label class="fieldlabel">Soil moisture</label>
+      <select id="s_moist" class="textfield">${['Low','Medium','High'].map(s=>`<option>${s}</option>`).join('')}</select>
+      <button class="btn-primary big" id="soilBtn" onclick="submitSoil()">Check Soil Health</button>
+    `;
+  } else {
+    const r = state.soilResult.health;
+    body.innerHTML = `
+      <div class="scorecircle-wrap"><div class="scorecircle ${r.score>=75?'great':r.score>=50?'good':'bad'}">${r.score}</div><div class="scorecirc-label">${r.label} soil health</div></div>
+      ${r.notes.length?`<ul class="reasonlist">${r.notes.map(n=>`<li class="no">⚠️ ${n}</li>`).join('')}</ul>`:'<p class="hint">No major issues detected.</p>'}
+      <h3 class="subhead">Compare with a crop</h3>
+      <select id="s_cropSelect" class="textfield" onchange="renderSoilCropCompare()">${CROPS.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select>
+      <div id="soilCropCompare">Loading…</div>
+      <button class="btn-secondary big" onclick="state.soilResult=null; render();">↻ New soil check</button>
+    `;
+    setTimeout(renderSoilCropCompare, 0);
+  }
+  wrap.appendChild(body);
+  return wrap;
+}
+async function submitSoil(){
+  const btn = $('#soilBtn'); if(btn){ btn.textContent='Checking…'; btn.disabled=true; }
+  const s = { type:$('#s_type').value, ph:parseFloat($('#s_ph').value), n:$('#s_n').value, p:$('#s_p').value, k:$('#s_k').value, moisture:$('#s_moist').value };
+  state.soilResult = await submitSoilCheck(s);
+  render();
+}
+async function renderSoilCropCompare(){
+  const sel = $('#s_cropSelect'); if(!sel) return;
+  const msgs = await fetchSoilCompare(state.soilResult.input, sel.value);
+  const target = $('#soilCropCompare'); if(!target) return;
+  target.innerHTML = `<ul class="reasonlist">${msgs.map(m=>`<li>${m.icon} ${m.text}</li>`).join('')}</ul>`;
+}
+
+// ---- WEATHER ----
+function screenWeather(){
+  const wrap = el('div','screen');
+  wrap.appendChild(header('Weather & Suitability','home'));
+  const body = el('div','content');
+  if(!state.weatherCache) triggerWeatherLoad();
+  const w = state.weatherCache || {temp:'--',condition:'Loading…',humidity:'--',rainChance:'--',forecast:[]};
+  body.innerHTML = `
+    ${statusPill()}
+    <div class="weather-big"><div class="wtemp-big">${w.temp}${w.temp!=='--'?'°C':''}</div><div>${w.condition}</div><div class="wsub">Humidity ${w.humidity}% · Rain chance ${w.rainChance}%</div></div>
+    <div class="forecastrow">${(w.forecast||[]).map(f=>`<div class="forecastday"><div>${f.d}</div><div class="fc-t">${f.t}°</div><div class="fc-r">💧${f.r}%</div></div>`).join('')}</div>
+    ${state.weatherCache?`<div class="alertbox">${weatherAlerts(w).map(a=>`<div class="alertrow">${a.icon} ${a.text}</div>`).join('')}</div>`:''}
+    <h3 class="subhead">Check suitability for a crop</h3>
+    <select id="w_cropSelect" class="textfield" onchange="renderWeatherCompare()">${CROPS.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select>
+    <div id="weatherCompare">${state.weatherCache?weatherCompareHtml(CROPS[0].id,w):'Loading…'}</div>
+  `;
+  wrap.appendChild(body);
+  return wrap;
+}
+function weatherCompareHtml(cropId,w){
+  const crop = findCrop(cropId);
+  const {msgs,score} = weatherSuitability(crop,w);
+  const verdict = score>=80?`✅ Weather is suitable for growing ${crop.name}`:score>=55?`⚠️ Weather is borderline for ${crop.name}`:`❌ Weather is currently unsuitable for ${crop.name}`;
+  return `<div class="scorecircle-wrap"><div class="scorecircle ${score>=80?'great':score>=55?'ok':'bad'}">${score}</div><div class="scorecirc-label">${verdict}</div></div>
+  <ul class="reasonlist">${msgs.map(m=>`<li>${m.icon} ${m.text}</li>`).join('')}</ul>`;
+}
+function renderWeatherCompare(){ if(state.weatherCache) $('#weatherCompare').innerHTML = weatherCompareHtml($('#w_cropSelect').value, state.weatherCache); }
+
+// ---- MY FARM ----
+function screenMyFarm(){
+  const wrap = el('div','screen');
+  wrap.appendChild(header('My Farm','home'));
+  const body = el('div','content');
+  body.id = 'myFarmBody';
+  body.innerHTML = `<p class="hint">Loading your farm…</p>`;
+  wrap.appendChild(body);
+  loadFarmCrops();
+  return wrap;
+}
+async function loadFarmCrops(){
+  let crops = null;
+  if(state.backendOnline && state.farmId){
+    try{
+      const data = await apiFetch(`/farms/${state.farmId}/crops`);
+      crops = data.map(fc=>({ cropId:fc.crop_id, area:fc.area_acres, plantedDate:fc.planted_date, harvestDate:fc.expected_harvest_date, daysSince:fc.days_since_planting, stage:fc.current_stage, backendId:fc.id }));
+    }catch(e){ console.warn('Live farm load failed, using local list:', e.message); }
+  }
+  if(crops===null) crops = state.myFarm.map(f=>({...f}));
+  const body = $('#myFarmBody'); if(!body) return;
+  if(crops.length===0){
+    body.innerHTML = `<div class="emptystate"><div class="emptystate-emoji">🌱</div><h3>No crops added yet</h3><p>Add a crop from its detail page to start tracking watering, fertilizer, and harvest tasks.</p><button class="btn-primary big" onclick="go('cropList')">Browse Crops</button></div>`;
+  } else {
+    body.innerHTML = `<div class="reslist">${crops.map((f,i)=>farmCardHtml(f,i)).join('')}</div>
+    <button class="btn-secondary big" onclick="go('cropList')">➕ Add another crop</button>`;
+  }
+}
+function farmCardHtml(f,i){
+  const crop = findCrop(f.cropId);
+  let days = f.daysSince, stage = f.stage, harvestDate = f.harvestDate;
+  if(days===undefined){
+    days = Math.floor((Date.now()-new Date(f.plantedDate))/86400000);
+    stage = crop.stages[0].name;
+    for(const s of crop.stages){ const end = parseInt(s.days.split(/[–-]/).pop()); if(days<=end){ stage=s.name; break; } }
+    harvestDate = new Date(new Date(f.plantedDate).getTime() + crop.duration*86400000).toISOString().slice(0,10);
+  }
+  return `<div class="farmcard">
+    <div class="farmcard-top"><span class="chipemoji">${crop.emoji}</span><div><div class="listrow-name">${crop.name}</div><div class="listrow-sub">${f.area} acre(s) · Planted ${f.plantedDate}</div></div>
+      <button class="iconbtn" onclick="removeFarmCrop(${i})">🗑</button></div>
+    <div class="infogrid">
+      <div class="infobox"><div class="infolabel">Days since planting</div><div class="infoval">${days<0?0:days}</div></div>
+      <div class="infobox"><div class="infolabel">Current stage</div><div class="infoval">${stage}</div></div>
+      <div class="infobox"><div class="infolabel">Next watering</div><div class="infoval">${crop.irrigation.split(';')[0]}</div></div>
+      <div class="infobox"><div class="infolabel">Expected harvest</div><div class="infoval">${harvestDate}</div></div>
+    </div>
+    <button class="btn-secondary" onclick="go('cropDetail',{cropDetailId:'${crop.id}',cropDetailCache:null})">View full crop guide →</button>
+  </div>`;
+}
+function removeFarmCrop(i){ state.myFarm.splice(i,1); render(); } // local-only remove; backend delete endpoint can be added if needed
+
+// ---- YIELD ----
+function screenYield(){
+  const wrap = el('div','screen');
+  wrap.appendChild(header('Yield Prediction','home'));
+  const body = el('div','content');
+  body.innerHTML = `
+    <label class="fieldlabel">Crop</label>
+    <select id="y_crop" class="textfield">${CROPS.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select>
+    <label class="fieldlabel">Farm area (acres)</label>
+    <input id="y_area" class="textfield" type="number" value="1" min="0.1" step="0.1">
+    <label class="fieldlabel">Soil health score (0-100, from Soil Check)</label>
+    <input id="y_soil" class="textfield" type="number" value="${state.soilResult?state.soilResult.health.score:70}" min="0" max="100">
+    <label class="fieldlabel">Farming method</label>
+    <select id="y_method" class="textfield"><option value="conventional">Conventional</option><option value="organic">Organic</option></select>
+    <button class="btn-primary big" id="yieldBtn" onclick="submitYield()">Estimate Yield</button>
+    <div id="yieldResult"></div>
+  `;
+  wrap.appendChild(body);
+  return wrap;
+}
+async function submitYield(){
+  const btn = $('#yieldBtn'); if(btn){ btn.textContent='Calculating…'; btn.disabled=true; }
+  const cropId = $('#y_crop').value;
+  const area = parseFloat($('#y_area').value)||1;
+  const soil = parseFloat($('#y_soil').value)||70;
+  const method = $('#y_method').value;
+  const r = await submitYieldPrediction(cropId, area, soil, method);
+  if(btn){ btn.textContent='Estimate Yield'; btn.disabled=false; }
+  $('#yieldResult').innerHTML = `
+    <div class="resultbox">
+      <div class="resultbox-title">Estimated yield</div>
+      <div class="resultbox-big">${r.low.toLocaleString()} – ${r.high.toLocaleString()} ${r.unit}</div>
+      <p class="notebox warn">This is an estimate only. Actual yield depends on weather, pest pressure, exact soil conditions, and day-to-day management.</p>
+    </div>`;
+}
+
+// ---- PROFIT ----
+function screenProfit(){
+  const wrap = el('div','screen');
+  wrap.appendChild(header('Profit Calculator','home'));
+  const body = el('div','content');
+  body.innerHTML = `
+    <label class="fieldlabel">Farm area (acres)</label>
+    <input id="p_area" class="textfield" type="number" value="1" step="0.1">
+    <label class="fieldlabel">Seed cost (₹)</label>
+    <input id="p_seed" class="textfield" type="number" value="3000">
+    <label class="fieldlabel">Fertilizer cost (₹)</label>
+    <input id="p_fert" class="textfield" type="number" value="4000">
+    <label class="fieldlabel">Labour cost (₹)</label>
+    <input id="p_labour" class="textfield" type="number" value="8000">
+    <label class="fieldlabel">Irrigation cost (₹)</label>
+    <input id="p_irrig" class="textfield" type="number" value="3000">
+    <label class="fieldlabel">Other expenses (₹)</label>
+    <input id="p_other" class="textfield" type="number" value="2000">
+    <label class="fieldlabel">Expected yield (kg)</label>
+    <input id="p_yield" class="textfield" type="number" value="10000">
+    <label class="fieldlabel">Expected selling price (₹/kg)</label>
+    <input id="p_price" class="textfield" type="number" value="12">
+    <button class="btn-primary big" id="profitBtn" onclick="submitProfit()">Calculate Profit</button>
+    <div id="profitResult"></div>
+  `;
+  wrap.appendChild(body);
+  return wrap;
+}
+async function submitProfit(){
+  const btn = $('#profitBtn'); if(btn){ btn.textContent='Calculating…'; btn.disabled=true; }
+  const area = parseFloat($('#p_area').value)||1;
+  const payload = {
+    areaAcres:area, seedCost:parseFloat($('#p_seed').value)||0, fertilizerCost:parseFloat($('#p_fert').value)||0,
+    labourCost:parseFloat($('#p_labour').value)||0, irrigationCost:parseFloat($('#p_irrig').value)||0,
+    otherCost:parseFloat($('#p_other').value)||0, expectedYield:parseFloat($('#p_yield').value)||0, sellingPrice:parseFloat($('#p_price').value)||0
+  };
+  const r = await submitProfitCalc(payload);
+  if(btn){ btn.textContent='Calculate Profit'; btn.disabled=false; }
+  $('#profitResult').innerHTML = `
+    <div class="resultbox">
+      <div class="pl-row"><span>Total investment</span><b>₹${r.cost.toLocaleString()}</b></div>
+      <div class="pl-row"><span>Expected revenue</span><b>₹${r.revenue.toLocaleString()}</b></div>
+      <div class="pl-row total ${r.profit>=0?'pos':'neg'}"><span>Estimated profit</span><b>₹${r.profit.toLocaleString()}</b></div>
+      <div class="pl-row"><span>Profit per acre</span><b>₹${r.perAcre.toLocaleString()}</b></div>
+      <p class="notebox warn">⚠️ Market prices change often — treat the selling price as an estimate and check local mandi/market rates before selling.</p>
+    </div>`;
+}
+
+// ---- AI ASSISTANT ----
+function screenAssistant(){
+  const wrap = el('div','screen assistant-screen');
+  wrap.appendChild(header('Farmy Assistant','home'));
+  const body = el('div','content assistant-body');
+  body.innerHTML = `<div id="chatlog" class="chatlog">${state.chat.map(m=>`<div class="chatmsg ${m.role}">${m.text}</div>`).join('')}${state.chatBusy?'<div class="chatmsg assistant typing">Thinking…</div>':''}</div>
+    <div class="chatinputrow">
+      <input id="chatInput" class="textfield chatinput" placeholder="Ask about planting, water, pests…" onkeydown="if(event.key==='Enter')sendChat()">
+      <button class="btn-primary sendbtn" onclick="sendChat()">Send</button>
+    </div>`;
+  wrap.appendChild(body);
+  setTimeout(()=>{ const l=$('#chatlog'); if(l) l.scrollTop=l.scrollHeight; },0);
+  return wrap;
+}
+async function sendChat(){
+  const input = $('#chatInput'); const text = input.value.trim();
+  if(!text || state.chatBusy) return;
+  state.chat.push({role:'user',text});
+  input.value='';
+  state.chatBusy = true;
+  render();
+
+  let replyText;
+  if(state.backendOnline && state.session){
+    try{
+      const data = await apiFetch('/assistant/ask', {method:'POST', body:JSON.stringify({message:text, history:state.chat.slice(0,-1)})});
+      replyText = data.reply;
+    }catch(e){
+      console.warn('Live assistant failed:', e.message);
+      replyText = assistantLocalFallback(text);
+    }
+  } else {
+    replyText = assistantLocalFallback(text);
+  }
+  state.chat.push({role:'assistant', text: replyText});
+  state.chatBusy = false;
+  render();
+}
+
+// Offline/unauthenticated fallback: a small rule-based helper using the
+// built-in crop database, so the Assistant tab still gives useful answers
+// in Demo Mode (no server-side AI key is ever exposed to the browser).
+function assistantLocalFallback(text){
+  const q = text.toLowerCase();
+  const mentioned = CROPS.find(c => q.includes(c.name.toLowerCase().split(' ')[0]));
+  if(mentioned){
+    if(/water|irrigat/.test(q)) return `${mentioned.name} needs ${mentioned.water.toLowerCase()} water — ${mentioned.irrigation}. The most critical stage for water is: ${mentioned.waterCritical}.`;
+    if(/fertil|npk|nutrient/.test(q)) return `${mentioned.name}'s typical fertilizer need is N:${mentioned.npk.n} P:${mentioned.npk.p} K:${mentioned.npk.k}${mentioned.npk.note?' ('+mentioned.npk.note+')':' kg/acre'}. ${mentioned.fertNote}`;
+    if(/pest|disease|insect|bug/.test(q)) return `Common issues for ${mentioned.name} include: ${mentioned.pests.map(id=>PESTS[id]?.name).filter(Boolean).join(', ')}. Open the Pest Check tool and select your symptoms for detailed guidance.`;
+    if(/plant|sow|grow|start/.test(q)) return `To plant ${mentioned.name}: ${mentioned.planting[0]} Best season: ${mentioned.seasons.join(', ')} (${mentioned.months}). See the crop's Overview tab for the full planting guide.`;
+    return `${mentioned.name} grows best in ${mentioned.soils.join(' or ')} soil, pH ${mentioned.ph[0]}–${mentioned.ph[1]}, ${mentioned.temp[0]}–${mentioned.temp[1]}°C. Duration: about ${mentioned.duration} days. Open the crop page for the full guide.`;
+  }
+  return "I'm running in offline Demo Mode right now, so I can only answer basic questions about crops in the database (try naming a crop, like \"how much water does tomato need\"). Connect the live backend with an AI key for full conversational answers — see the README.";
+}
+
+// ---- INIT ----
+document.addEventListener('DOMContentLoaded', ()=>{
+  render();
+  checkBackend();
+  document.querySelectorAll('#bottomNav .navitem').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const s = b.dataset.screen;
+      if(s==='home') go('home');
+      else if(s==='recommend') go('recommend',{recResults:null});
+      else if(s==='myfarm') go('myfarm');
+      else if(s==='tools') go('soil');
+      else if(s==='assistant') go('assistant');
+    });
+  });
+});
+
+</script>
+</body>
+</html>
